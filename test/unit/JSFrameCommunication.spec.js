@@ -1,5 +1,7 @@
 'use strict';
 
+var noop = require('../testHelper').noop;
+var after = require('../testHelper').after;
 var JSFrameCommunication = require('../../js/JSFrameCommunication');
 
 describe('JSFrameCommunication.js api', function()  {
@@ -19,6 +21,64 @@ describe('JSFrameCommunication.js api', function()  {
         assert(fakePost.calledWith(JSON.stringify(expected0Arg), '*'));
         assert.deepEqual(JSON.parse(fakePost.getCall(0).args[0]), expected0Arg);
     });
-});
 
+    it('must implement on', function () {
+        var frameComm = new JSFrameCommunication(window, '*', ['*']);
+        assert.isFunction(frameComm.on);
+
+        assert.equal(frameComm._subscribers.size(), 0);
+
+        frameComm.on('hello', noop);
+        assert.equal(frameComm._subscribers.size(), 1);
+
+        frameComm.on('hello1', noop);
+        assert.equal(frameComm._subscribers.size(), 2);
+    });
+
+    it('must implement off', function () {
+        var frameComm = new JSFrameCommunication(window, '*', ['*']);
+        assert.isFunction(frameComm.off);
+    });
+
+    it('must implement offEvent', function () {
+        var frameComm = new JSFrameCommunication(window, '*', ['*']);
+        assert.isFunction(frameComm.offEvent);
+    });
+
+    it('must implement offAll', function () {
+        var frameComm = new JSFrameCommunication(window, '*', ['*']);
+        assert.isFunction(frameComm.offAll);
+    });
+
+    it('must implement _trigger', function (done) {
+        var frameComm = new JSFrameCommunication(window, '*', ['*']);
+        assert.isFunction(frameComm._trigger);
+        var callback1, callback2;
+
+        var arg1 = [null, {msg: 'lost message :('}];
+        var arg2 = [null, {msg: 'some message'}];
+        var arg3 = [{msg: 'some error'}, null];
+        var arg4 = [null, {msg: 'some other message'}];
+
+        var counter = after(3, function () {
+            assert(callback1.calledTwice);
+            assert(callback2.calledOnce);
+
+            assert.deepEqual(callback1.getCall(0).args, arg2);
+            assert.deepEqual(callback1.getCall(1).args, arg3);
+            assert.deepEqual(callback2.getCall(0).args, arg4);
+            done();
+        });
+        callback1 = sinon.spy(counter);
+        callback2 = sinon.spy(counter);
+
+        frameComm.on('hello1',  callback1);
+        frameComm.on('hello2',  callback2);
+
+        frameComm._trigger.apply(frameComm, ['no subscribers'].concat(arg1));
+        frameComm._trigger.apply(frameComm, ['hello1'].concat(arg2));
+        frameComm._trigger.apply(frameComm, ['hello1'].concat(arg3));
+        frameComm._trigger.apply(frameComm, ['hello2'].concat(arg4));
+    });
+});
 
