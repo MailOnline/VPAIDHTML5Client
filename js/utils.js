@@ -10,3 +10,10 @@ module.exports.createIframe = function createIframe(parent, url) {
     return nEl;
 };
 
+module.exports.unique = function unique(prefix) {
+    var count = -1;
+    return function () {
+        return prefix + '_' + (++count);
+    };
+}
+

@@ -9,10 +9,16 @@ describe('JSFrameCommunication.js api', function()  {
         assert.isFunction(JSFrameCommunication, 'must be a function');
     });
 
+    it('must implement getID', function () {
+        var frameComm = new JSFrameCommunication(window, '*', ['*'], 'hello');
+        assert.isFunction(frameComm.getID);
+        assert.equal(frameComm.getID(), 'hello');
+    });
+
     it('must implement postMessage', function () {
         var fakePost = sinon.stub(window, 'postMessage');
-        var frameComm = new JSFrameCommunication(window, '*', ['*']);
-        var expected0Arg = {type: 'event', typeDetail: 'AdLoaded', msg: [null, 'ok']};
+        var frameComm = new JSFrameCommunication(window, '*', ['*'], 'hello');
+        var expected0Arg = {id: frameComm.getID(), type: 'event', typeDetail: 'AdLoaded', msg: [null, 'ok']};
 
         assert.isFunction(frameComm.postMessage);
         frameComm.postMessage('event', 'AdLoaded', [null, 'ok']);
@@ -23,7 +29,7 @@ describe('JSFrameCommunication.js api', function()  {
     });
 
     it('must implement on', function () {
-        var frameComm = new JSFrameCommunication(window, '*', ['*']);
+        var frameComm = new JSFrameCommunication(window, '*', ['*'], 'hello');
         assert.isFunction(frameComm.on);
 
         assert.equal(frameComm._subscribers.size(), 0);
@@ -36,22 +42,22 @@ describe('JSFrameCommunication.js api', function()  {
     });
 
     it('must implement off', function () {
-        var frameComm = new JSFrameCommunication(window, '*', ['*']);
+        var frameComm = new JSFrameCommunication(window, '*', ['*'], 'hello');
         assert.isFunction(frameComm.off);
     });
 
     it('must implement offEvent', function () {
-        var frameComm = new JSFrameCommunication(window, '*', ['*']);
+        var frameComm = new JSFrameCommunication(window, '*', ['*'], 'hello');
         assert.isFunction(frameComm.offEvent);
     });
 
     it('must implement offAll', function () {
-        var frameComm = new JSFrameCommunication(window, '*', ['*']);
+        var frameComm = new JSFrameCommunication(window, '*', ['*'], 'hello');
         assert.isFunction(frameComm.offAll);
     });
 
     it('must implement _trigger', function (done) {
-        var frameComm = new JSFrameCommunication(window, '*', ['*']);
+        var frameComm = new JSFrameCommunication(window, '*', ['*'], 'hello');
         assert.isFunction(frameComm._trigger);
         var callback1, callback2;
 
@@ -80,5 +86,22 @@ describe('JSFrameCommunication.js api', function()  {
         frameComm._trigger.apply(frameComm, ['hello1'].concat(arg3));
         frameComm._trigger.apply(frameComm, ['hello2'].concat(arg4));
     });
+
+    it('must handle window events', function() {
+        var frameComm = new JSFrameCommunication(window, '*', ['*'], 'hello');
+        var data = {id: frameComm.getID(), type: 'event', typeDetail: 'hello1', msg: [null, 'success']};
+        var event = new CustomEvent('message');
+        event.origin = '*';
+        event.data = JSON.stringify(data);
+
+        var callback1 = sinon.spy(function () {
+            assert(callback1.calledOnce);
+            assert.sameDeepMembers(callback1.getCall(0).args, [null, 'success']);
+        });
+
+        frameComm.on('hello1', callback1);
+        window.dispatchEvent(event);
+    });
+
 });
 

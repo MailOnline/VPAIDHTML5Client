@@ -14,6 +14,11 @@ describe('VPAIDHTML5Client.js api', function()  {
     it('must exist', function () {
         assert.isFunction(VPAIDHTML5Client, 'must be a function');
     });
+    it('must implement getID', function () {
+        var vpaid = new VPAIDHTML5Client(el, url, frameConfig);
+        assert.isFunction(vpaid.getID, 'must be a function');
+        assert.equal(vpaid.getID(), 'vpaidIframe_0');
+    });
     it('must implement loadAdUnit', function () {
         var vpaid = new VPAIDHTML5Client(el, url, frameConfig);
         assert.isFunction(vpaid.loadAdUnit, 'must be a function');

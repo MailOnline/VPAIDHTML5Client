@@ -16,5 +16,12 @@ describe('utils.js api', function () {
         assert.equal(utils.createIframe(parentElement, url).parentElement, parentElement, 'must return a HTMLElement that is a child of the element used in the arguments');
     });
 
+    it('must implement unique', function () {
+        assert.isFunction(utils.unique, 'must be a function');
+        assert.isFunction(utils.unique('hello'), 'must return a function');
+        assert.match(utils.unique('hello')(), /hello_/, 'must return a string with prefix');
+        assert.match(utils.unique('hello')(), /hello_/, 'must return a string with prefix');
+    });
+
 });
 
