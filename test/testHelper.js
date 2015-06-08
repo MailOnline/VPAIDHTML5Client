@@ -9,3 +9,10 @@ module.exports.after = function after(count, handler) {
 
 module.exports.noop = function (){};
 
+module.exports.framePostMessage = function (data) {
+    var event = new CustomEvent('message');
+    event.origin = '*';
+    event.data = JSON.stringify(data);
+    window.dispatchEvent(event);
+};
+
