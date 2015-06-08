@@ -87,7 +87,7 @@ describe('JSFrameCommunication.js api', function()  {
         frameComm._trigger.apply(frameComm, ['hello2'].concat(arg4));
     });
 
-    it('must handle window events', function() {
+    it('must handle window message events', function() {
         var frameComm = new JSFrameCommunication(window, '*', ['*'], 'hello');
         var data = {id: frameComm.getID(), type: 'event', typeDetail: 'hello1', msg: [null, 'success']};
         var event = new CustomEvent('message');
