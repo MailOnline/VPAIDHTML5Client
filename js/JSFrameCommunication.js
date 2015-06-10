@@ -66,6 +66,10 @@ JSFrameCommunication.prototype._fireCallback = function trigger(callbackID, err,
     }
 }
 
+JSFrameCommunication.prototype.destroy = function destroy() {
+    this.offAll();
+    this._callbacks.removeAll();
+}
 
 function _addListener(context, allowedOrigins) {
     window.addEventListener('message', function receiveMessage (e) {

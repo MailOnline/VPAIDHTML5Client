@@ -11,8 +11,6 @@ function VPAIDHTML5Client(el, url, frameConfig, callback) {
     this._el = utils.createIframe(el, url + '?vpaidID=' + id);
     this._frame = new JSFrameCommunication(this._el, frameConfig.origin, frameConfig.allowed, id);
     this._frame.on('vpaid_handshake', function (err, result) {
-        if(this.isDestroyed()) {return;}
-
         this._ready = true;
 
         if (callback) {
@@ -30,17 +28,22 @@ function VPAIDHTML5Client(el, url, frameConfig, callback) {
 
 VPAIDHTML5Client.prototype.destroy = function destroy() {
     this._destroyed = true;
+    if (this._frame) {
+        this._frame.destroy();
+        this._frame = null;
+    }
 }
 
 VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
     return this._destroyed;
 }
 
-VPAIDHTML5Client.prototype.isReady = function isDestroyed() {
+VPAIDHTML5Client.prototype.isReady = function isReady() {
     return this._ready;
 }
 
 VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
+    $throwIfDestroyed.call(this);
     if (this._ready) {
         this._frame.postMessage('method', 'loadAdUnit', adURL, function (err, msg) {
             if (!err) {
@@ -58,7 +61,14 @@ VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
 }
 
 VPAIDHTML5Client.prototype.getID = function () {
+    $throwIfDestroyed.call(this);
     return this._frame.getID();
+}
+
+function $throwIfDestroyed() {
+    if (this._destroyed) {
+        throw new Error ('VPAIDHTML5Client already destroyed!');
+    }
 }
 
 module.exports = VPAIDHTML5Client;
