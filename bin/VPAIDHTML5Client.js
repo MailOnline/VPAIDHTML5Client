@@ -1,53 +1,18 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var utils = require('./utils');
-var JSFrameCommunication = require('./JSFrameCommunication');
-var unique = utils.unique('vpaidIframe');
-
-function VPAIDHTML5Client(el, url, frameConfig, callback) {
-    var id = unique();
-    this._destroyed = false;
-    this._el = utils.createIframe(el, url + '?vpaidID=' + id);
-    this._frame = new JSFrameCommunication(this._el, frameConfig.origin, frameConfig.allowed, id);
-    this._frame.on('handshake', function (err, result) {
-        if(this.isDestroyed()) {return;}
-        callback(err, result);
-    }.bind(this));
-}
-
-VPAIDHTML5Client.prototype.destroy = function destroy() {
-    this._destroyed = true;
-}
-
-VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
-    return this._destroyed;
-}
-
-VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit() {
-}
-
-VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
-}
-
-VPAIDHTML5Client.prototype.getID = function () {
-    return this._frame.getID();
-}
-
-module.exports = VPAIDHTML5Client;
-
-
-},{"./JSFrameCommunication":2,"./utils":4}],2:[function(require,module,exports){
-'use strict';
-
+var unique = require('./utils').unique;
 var SingleValueRegistry = require('./registry').SingleValueRegistry;
 var MultipleValuesRegistry = require('./registry').MultipleValuesRegistry;
+
 
 function JSFrameCommunication(targetFrame, targetOrigin, allowedOrigins, frameID) {
     this._targetFrame = targetFrame;
     this._targetOrigin = targetOrigin;
+    this._callbacks = new SingleValueRegistry();
     this._subscribers = new MultipleValuesRegistry();
     this._frameID = frameID;
+    this._uniqueCallbackID = unique(frameID);
     _addListener(this, allowedOrigins);
 }
 
@@ -55,8 +20,12 @@ JSFrameCommunication.prototype.getID = function getID() {
     return this._frameID;
 }
 
-JSFrameCommunication.prototype.postMessage = function postMessage(type, typeDetail, msg) {
-    this._targetFrame.postMessage(JSON.stringify({id: this._frameID, type: type, typeDetail: typeDetail, msg: msg}), this._targetOrigin);
+JSFrameCommunication.prototype.postMessage = function postMessage(type, typeDetail, msg, callback) {
+    var message = {id: this._frameID, type: type, typeDetail: typeDetail, msg: msg};
+    if (callback) {
+        message.callbackID = this._addCallback(callback);
+    }
+    this._targetFrame.contentWindow.postMessage(JSON.stringify(message), this._targetOrigin);
 }
 
 JSFrameCommunication.prototype.on = function on(eventName, handler) {
@@ -75,6 +44,12 @@ JSFrameCommunication.prototype.offAll = function off() {
     this._subscribers.removeAll();
 }
 
+JSFrameCommunication.prototype._addCallback = function _addCallback(callback) {
+    var callbackID = this._uniqueCallbackID();
+    this._callbacks.add(callbackID, callback);
+    return callbackID;
+}
+
 JSFrameCommunication.prototype._trigger = function trigger(eventName, err, result) {
     this._subscribers.get(eventName).forEach(function (callback) {
         setTimeout(function () {
@@ -83,21 +58,102 @@ JSFrameCommunication.prototype._trigger = function trigger(eventName, err, resul
     });
 };
 
+JSFrameCommunication.prototype._fireCallback = function trigger(callbackID, err, result) {
+    var callback = this._callbacks.get(callbackID);
+    if (callback) {
+        setTimeout(function () {
+            callback(err, result);
+        }.bind(this), 0);
+    }
+}
+
+
 function _addListener(context, allowedOrigins) {
     window.addEventListener('message', function receiveMessage (e) {
         if (allowedOrigins.indexOf(e.origin) === -1) { return; }
         var data = JSON.parse(e.data);
         if (data.id !== context.getID()) { return; }
 
-        context._trigger.apply(context, [data.typeDetail].concat(data.msg));
-        //TODO handle callbacks
+        if (data.type === 'event') {
+            context._trigger.apply(context, [data.typeDetail].concat(data.msg));
+        } else if (data.type === 'method') {
+            context._fireCallback.apply(context, [data.callbackID].concat(data.msg));
+        }
+
     });
 }
 
 module.exports = JSFrameCommunication;
 
 
-},{"./registry":3}],3:[function(require,module,exports){
+},{"./registry":3,"./utils":4}],2:[function(require,module,exports){
+'use strict';
+
+var utils = require('./utils');
+var JSFrameCommunication = require('./JSFrameCommunication');
+var unique = utils.unique('vpaidIframe');
+
+function VPAIDHTML5Client(el, url, frameConfig, callback) {
+    var id = unique();
+    this._destroyed = false;
+    this._ready = false;
+    this._el = utils.createIframe(el, url + '?vpaidID=' + id);
+    this._frame = new JSFrameCommunication(this._el, frameConfig.origin, frameConfig.allowed, id);
+    this._frame.on('vpaid_handshake', function (err, result) {
+        if(this.isDestroyed()) {return;}
+
+        this._ready = true;
+
+        if (callback) {
+            callback(err, result);
+        }
+
+        if (this._autoLoad) {
+            var autoLoad = this._autoLoad;
+            delete this._autoLoad;
+            this.loadAdUnit(autoLoad.url, autoLoad.callback);
+        }
+
+    }.bind(this));
+}
+
+VPAIDHTML5Client.prototype.destroy = function destroy() {
+    this._destroyed = true;
+}
+
+VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
+    return this._destroyed;
+}
+
+VPAIDHTML5Client.prototype.isReady = function isDestroyed() {
+    return this._ready;
+}
+
+VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
+    if (this._ready) {
+        this._frame.postMessage('method', 'loadAdUnit', adURL, function (err, msg) {
+            if (!err) {
+                this._adUnit = {};
+            }
+            callback(err, this._adUnit);
+        }.bind(this));
+    } else {
+        this._autoLoad = {url: adURL, callback: callback};
+    }
+}
+
+VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
+    if (this._autoLoad) { delete this._autoLoad; }
+}
+
+VPAIDHTML5Client.prototype.getID = function () {
+    return this._frame.getID();
+}
+
+module.exports = VPAIDHTML5Client;
+
+
+},{"./JSFrameCommunication":1,"./utils":4}],3:[function(require,module,exports){
 'use strict';
 
 function Registry() {
@@ -239,7 +295,7 @@ module.exports.unique = function unique(prefix) {
 }
 
 
-},{}]},{},[1])
+},{}]},{},[2])
 
 
 //# sourceMappingURL=VPAIDHTML5Client.js.map

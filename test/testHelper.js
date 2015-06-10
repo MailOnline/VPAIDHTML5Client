@@ -16,3 +16,21 @@ module.exports.framePostMessage = function (data) {
     window.dispatchEvent(event);
 };
 
+
+module.exports.mockPostMessage = function (el, handler, context) {
+    var contentWindow = {
+        postMessage: function() {
+            var args = arguments;
+            setTimeout(function () {
+                handler.apply(context, args);
+            }, 0);
+        }
+    };
+
+    Object.defineProperty(el, 'contentWindow', {
+        get: function () {
+            return contentWindow;
+        }
+    });
+}
+
