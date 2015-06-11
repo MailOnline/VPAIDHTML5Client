@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>VPAIDHTML5Client</title>
+    <script type="text/javascript" src="/VPAIDHTML5Client.js"></script>
 </head>
 <body>
     hello world
+    <div id="myContent"></div>
+    <script>
+        var el = document.getElementById('myContent');
+        var vpaid = new VPAIDHTML5Client(el, '/', {origin: '*', allowed: ['*']}, function () {
+            console.log('hello');
+        });
+    </script>
 </body>
 </html>

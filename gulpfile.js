@@ -21,35 +21,54 @@ var karma = require('karma').server;
 //paths
 var testPath = 'test/**/**.js';
 var binPath = './bin';
-var mainJS = 'VPAIDHTML5Client.js';
 
-var jsBuild = watchify(
-    browserify(
-        assign(
-            {},
-            watchify.args,
-            {
-                entries: ['./js/' + mainJS],
-                debug: true
-            }
+var jsBuilds = [
+    'VPAIDHTML5Client.js',
+    'VPAIDHTML5iFrame.js'
+].map(function (entry, index) {
+
+    var build = watchify(
+        browserify(
+            assign(
+                {},
+                watchify.args,
+                {
+                    entries: ['./js/' + entry],
+                    debug: true
+                }
+            )
         )
-    )
-);
+    );
+    var taskName = 'bundle:' + index;
 
-jsBuild.on('log', gutil.log); // output build logs to terminal
+    build.transform('brfs'); // parse readFileSync and inline the content of that file, useful for templates
+    build.on('log', gutil.log); // output build logs to terminal
+    gulp.task(taskName, task);
 
-function bundle() {
-    return jsBuild.bundle()
-        .on('error', gutil.log.bind(gutil, 'Browserify error'))
-        .pipe(source(mainJS))
-        .pipe(buffer())
-        .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(sourcemaps.write('./'))
-        .pipe(gulp.dest(binPath))
-        .pipe(reload({stream: true, once: true}));
+    return {js: build, task: task, taskName: taskName};
+
+    function task() {
+        return build.bundle()
+            .on('error', gutil.log.bind(gutil, 'Browserify error'))
+            .pipe(source(entry))
+            .pipe(buffer())
+            .pipe(sourcemaps.init({loadMaps: true}))
+            .pipe(sourcemaps.write('./'))
+            .pipe(gulp.dest(binPath))
+            .pipe(reload({stream: true, once: true}));
+    }
+});
+
+
+function watchBundle() {
+    jsBuilds.forEach(function (build) {
+        build.js.on('update', build.task);
+    });
 }
 
-gulp.task('browserify', bundle);
+gulp.task('browserify', jsBuilds.map(function (build) {
+    return build.taskName;
+}));
 
 gulp.task('test:ci', function (done) {
     karma.start({
@@ -68,7 +87,7 @@ gulp.task('test:dev', function (done) {
 
 //watch file changes
 gulp.task('watch:demo', function() {
-    jsBuild.on('update', bundle);
+    watchBundle();
     gulp.watch(['demo/*.html', 'demo/*.css'], reload);
     gulp.watch([binPath + '/*.js'], ['test:dev'], reload);
     gulp.watch([testPath], ['test:dev']);
@@ -76,7 +95,7 @@ gulp.task('watch:demo', function() {
 
 //watch file changes
 gulp.task('watch:test', function() {
-    jsBuild.on('update', bundle);
+    watchBundle();
     gulp.watch([binPath + '/*.js'], ['test:dev']);
     gulp.watch([testPath], ['test:dev']);
 });

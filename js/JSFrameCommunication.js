@@ -1,6 +1,7 @@
 'use strict';
 
 var unique = require('./utils').unique;
+var isTrue = require('./utils').constant(true);
 var SingleValueRegistry = require('./registry').SingleValueRegistry;
 var MultipleValuesRegistry = require('./registry').MultipleValuesRegistry;
 
@@ -24,7 +25,8 @@ JSFrameCommunication.prototype.postMessage = function postMessage(type, typeDeta
     if (callback) {
         message.callbackID = this._addCallback(callback);
     }
-    this._targetFrame.contentWindow.postMessage(JSON.stringify(message), this._targetOrigin);
+    var win = this._targetFrame.postMessage ? this._targetFrame : this._targetFrame.contentWindow;
+    win.postMessage(JSON.stringify(message), this._targetOrigin);
 }
 
 JSFrameCommunication.prototype.on = function on(eventName, handler) {
@@ -71,9 +73,18 @@ JSFrameCommunication.prototype.destroy = function destroy() {
     this._callbacks.removeAll();
 }
 
+JSFrameCommunication.HAND_SHAKE_EVENT = 'vpaid_handshake';
+
 function _addListener(context, allowedOrigins) {
+    var validateOrigin = (function () {
+        return (allowedOrigins.indexOf('*') !== -1) ? isTrue : function (origin) {
+            return allowedOrigins.indexOf(origin) !== -1;
+        }
+    })();
+
     window.addEventListener('message', function receiveMessage (e) {
-        if (allowedOrigins.indexOf(e.origin) === -1) { return; }
+        if (!validateOrigin(e.origin)) { return; }
+
         var data = JSON.parse(e.data);
         if (data.id !== context.getID()) { return; }
 

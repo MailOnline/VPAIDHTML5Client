@@ -1,29 +1,38 @@
 'use strict';
 
+var fs = require('fs');
 var utils = require('./utils');
 var JSFrameCommunication = require('./JSFrameCommunication');
 var unique = utils.unique('vpaidIframe');
+var template = fs.readFileSync(__dirname + '/iframe.template.html', 'utf8');
 
 function VPAIDHTML5Client(el, url, frameConfig, callback) {
-    var id = unique();
     this._destroyed = false;
     this._ready = false;
-    this._el = utils.createIframe(el, url + '?vpaidID=' + id);
-    this._frame = new JSFrameCommunication(this._el, frameConfig.origin, frameConfig.allowed, id);
-    this._frame.on('vpaid_handshake', function (err, result) {
-        this._ready = true;
+    this._id = unique();
+    this._el = utils.createIframe(el);
+    this._frame = _createFrameComm(
+        this._el,
+        {
+            id: this._id,
+            url: url + 'VPAIDHTML5iFrame.js',
+            origin: frameConfig.origin,
+            allowed: frameConfig.allowed
+        },
+        function(err, result) {
+            this._ready = true;
 
-        if (callback) {
-            callback(err, result);
-        }
+            if (callback) {
+                callback(err, result);
+            }
 
-        if (this._autoLoad) {
-            var autoLoad = this._autoLoad;
-            delete this._autoLoad;
-            this.loadAdUnit(autoLoad.url, autoLoad.callback);
-        }
-
-    }.bind(this));
+            if (this._autoLoad) {
+                var autoLoad = this._autoLoad;
+                delete this._autoLoad;
+                this.loadAdUnit(autoLoad.url, autoLoad.callback);
+            }
+        }.bind(this)
+    );
 }
 
 VPAIDHTML5Client.prototype.destroy = function destroy() {
@@ -65,6 +74,27 @@ VPAIDHTML5Client.prototype.getID = function () {
     return this._frame.getID();
 }
 
+function _createFrameComm(el, frameConfig, callback) {
+    _setFrameContent(el, frameConfig);
+
+    var frame = new JSFrameCommunication(el, frameConfig.origin, frameConfig.allowed, frameConfig.id);
+    frame.on(JSFrameCommunication.HAND_SHAKE_EVENT, callback);
+
+    return frame;
+}
+
+function _setFrameContent(iframe, data) {
+    var html = utils.simpleTemplate(template, {
+        iframeURL_JS: data.url,
+        id: data.id,
+        origin: data.origin,
+        allowedOrigins: data.allowed
+    });
+    setTimeout(function () {
+        utils.setIframeContent( iframe, html );
+    }, 0);
+}
+
 function $throwIfDestroyed() {
     if (this._destroyed) {
         throw new Error ('VPAIDHTML5Client already destroyed!');
@@ -72,4 +102,5 @@ function $throwIfDestroyed() {
 }
 
 module.exports = VPAIDHTML5Client;
+window.VPAIDHTML5Client = VPAIDHTML5Client;
 

@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/MailOnline/VPAIDHTML5Client",
   "devDependencies": {
+    "brfs": "^1.4.0",
     "browser-sync": "^2.7.6",
     "browserify": "^10.2.4",
     "chai": "^3.0.0",

@@ -104,109 +104,16 @@ module.exports = JSFrameCommunication;
 },{"./registry":3,"./utils":4}],2:[function(require,module,exports){
 'use strict';
 
-
 var utils = require('./utils');
 var JSFrameCommunication = require('./JSFrameCommunication');
-var unique = utils.unique('vpaidIframe');
-var template = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title></title>\n</head>\n<body>\n    <script type=\"text/javascript\" src={{iframeURL_JS}}></script>\n    <script type=\"text/javascript\">\n        var vpaidIframe = new VPAIDHTML5iFrame({{id}}, { origin: {{origin}}, allowed: {{allowedOrigins}} });\n    </script>\n</body>\n</html>\n";
 
-function VPAIDHTML5Client(el, url, frameConfig, callback) {
-    this._destroyed = false;
-    this._ready = false;
-    this._id = unique();
-    this._el = utils.createIframe(el);
-    this._frame = _createFrameComm(
-        this._el,
-        {
-            id: this._id,
-            url: url + 'VPAIDHTML5iFrame.js',
-            origin: frameConfig.origin,
-            allowed: frameConfig.allowed
-        },
-        function(err, result) {
-            this._ready = true;
-
-            if (callback) {
-                callback(err, result);
-            }
-
-            if (this._autoLoad) {
-                var autoLoad = this._autoLoad;
-                delete this._autoLoad;
-                this.loadAdUnit(autoLoad.url, autoLoad.callback);
-            }
-        }.bind(this)
-    );
+function VPAIDHTML5iFrame(id, frameConfig) {
+    this._frame = new JSFrameCommunication(parent, frameConfig.origin, frameConfig.allowed, id);
+    this._frame.postMessage('event', JSFrameCommunication.HAND_SHAKE_EVENT, [null, 'sucess']);
 }
 
-VPAIDHTML5Client.prototype.destroy = function destroy() {
-    this._destroyed = true;
-    if (this._frame) {
-        this._frame.destroy();
-        this._frame = null;
-    }
-}
-
-VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
-    return this._destroyed;
-}
-
-VPAIDHTML5Client.prototype.isReady = function isReady() {
-    return this._ready;
-}
-
-VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
-    $throwIfDestroyed.call(this);
-    if (this._ready) {
-        this._frame.postMessage('method', 'loadAdUnit', adURL, function (err, msg) {
-            if (!err) {
-                this._adUnit = {};
-            }
-            callback(err, this._adUnit);
-        }.bind(this));
-    } else {
-        this._autoLoad = {url: adURL, callback: callback};
-    }
-}
-
-VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
-    if (this._autoLoad) { delete this._autoLoad; }
-}
-
-VPAIDHTML5Client.prototype.getID = function () {
-    $throwIfDestroyed.call(this);
-    return this._frame.getID();
-}
-
-function _createFrameComm(el, frameConfig, callback) {
-    _setFrameContent(el, frameConfig);
-
-    var frame = new JSFrameCommunication(el, frameConfig.origin, frameConfig.allowed, frameConfig.id);
-    frame.on(JSFrameCommunication.HAND_SHAKE_EVENT, callback);
-
-    return frame;
-}
-
-function _setFrameContent(iframe, data) {
-    var html = utils.simpleTemplate(template, {
-        iframeURL_JS: data.url,
-        id: data.id,
-        origin: data.origin,
-        allowedOrigins: data.allowed
-    });
-    setTimeout(function () {
-        utils.setIframeContent( iframe, html );
-    }, 0);
-}
-
-function $throwIfDestroyed() {
-    if (this._destroyed) {
-        throw new Error ('VPAIDHTML5Client already destroyed!');
-    }
-}
-
-module.exports = VPAIDHTML5Client;
-window.VPAIDHTML5Client = VPAIDHTML5Client;
+module.exports = VPAIDHTML5iFrame;
+window.VPAIDHTML5iFrame = VPAIDHTML5iFrame;
 
 
 },{"./JSFrameCommunication":1,"./utils":4}],3:[function(require,module,exports){
@@ -386,4 +293,4 @@ module.exports.unique = function unique(prefix) {
 },{}]},{},[2])
 
 
-//# sourceMappingURL=VPAIDHTML5Client.js.map
+//# sourceMappingURL=VPAIDHTML5iFrame.js.map
