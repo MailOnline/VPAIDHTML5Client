@@ -62,13 +62,17 @@ describe('utils.js api', function () {
         });
     });
 
+    it('must implement constant', function () {
+        assert.isFunction(utils.constant, 'must be a function');
+        assert.isFunction(utils.constant('hello'), 'must return a function')
+    });
+
     it('must implement unique', function () {
         assert.isFunction(utils.unique, 'must be a function');
         assert.isFunction(utils.unique('hello'), 'must return a function');
         assert.match(utils.unique('hello')(), /hello_/, 'must return a string with prefix');
         assert.match(utils.unique('hello')(), /hello_/, 'must return a string with prefix');
     });
-
 
     describe('extend', function () {
 
@@ -104,7 +108,6 @@ describe('utils.js api', function () {
         });
 
     });
-
 
 });
 
