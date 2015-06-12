@@ -30,6 +30,15 @@ module.exports.setIframeContent = function setIframeContent(iframeEl, content) {
     return true;
 };
 
+module.exports.extend = function extend(toExtend, fromSource) {
+  for (var key in fromSource) {
+      if (fromSource.hasOwnProperty(key)) {
+            toExtend[key] = fromSource[key];
+          }
+    }
+  return toExtend;
+};
+
 module.exports.constant = function(value) {
     return function () {
         return value;

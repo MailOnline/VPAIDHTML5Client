@@ -16,6 +16,11 @@ module.exports.framePostMessage = function (data) {
     window.dispatchEvent(event);
 };
 
+module.exports.getBrowserifyPath = function () {
+    var el = document.querySelector('script[src*=browserify]');
+    return el.getAttribute('src');
+};
+
 
 module.exports.mockPostMessage = function (el, handler, context) {
     var contentWindow = {

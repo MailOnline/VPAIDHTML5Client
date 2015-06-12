@@ -108,7 +108,7 @@ module.exports = JSFrameCommunication;
 var utils = require('./utils');
 var JSFrameCommunication = require('./JSFrameCommunication');
 var unique = utils.unique('vpaidIframe');
-var template = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title></title>\n</head>\n<body>\n    <script type=\"text/javascript\" src={{iframeURL_JS}}></script>\n    <script type=\"text/javascript\">\n        var vpaidIframe = new VPAIDHTML5iFrame({{id}}, { origin: {{origin}}, allowed: {{allowedOrigins}} });\n    </script>\n</body>\n</html>\n";
+var defaultTemplate = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title></title>\n</head>\n<body>\n    <script type=\"text/javascript\" src={{iframeURL_JS}}></script>\n    <script type=\"text/javascript\">\n        var vpaidIframe = new VPAIDHTML5iFrame({{id}}, { origin: {{origin}}, allowed: {{allowedOrigins}} });\n    </script>\n</body>\n</html>\n";
 
 function VPAIDHTML5Client(el, url, frameConfig, callback) {
     this._destroyed = false;
@@ -121,7 +121,9 @@ function VPAIDHTML5Client(el, url, frameConfig, callback) {
             id: this._id,
             url: url + 'VPAIDHTML5iFrame.js',
             origin: frameConfig.origin,
-            allowed: frameConfig.allowed
+            allowed: frameConfig.allowed,
+            template: frameConfig.template || defaultTemplate,
+            templateConfig: frameConfig.templateConfig
         },
         function(err, result) {
             this._ready = true;
@@ -188,12 +190,15 @@ function _createFrameComm(el, frameConfig, callback) {
 }
 
 function _setFrameContent(iframe, data) {
-    var html = utils.simpleTemplate(template, {
+    var newData = {
         iframeURL_JS: data.url,
         id: data.id,
         origin: data.origin,
         allowedOrigins: data.allowed
-    });
+    };
+
+    var html = utils.simpleTemplate(data.template, utils.extend(newData, data.templateConfig));
+
     setTimeout(function () {
         utils.setIframeContent( iframe, html );
     }, 0);
@@ -361,6 +366,15 @@ module.exports.setIframeContent = function setIframeContent(iframeEl, content) {
     iframeDoc.close();
 
     return true;
+};
+
+module.exports.extend = function extend(toExtend, fromSource) {
+  for (var key in fromSource) {
+      if (fromSource.hasOwnProperty(key)) {
+            toExtend[key] = fromSource[key];
+          }
+    }
+  return toExtend;
 };
 
 module.exports.constant = function(value) {

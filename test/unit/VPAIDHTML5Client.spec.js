@@ -6,7 +6,7 @@ var framePostMessage = require('../testHelper').framePostMessage;
 var VPAIDHTML5Client = require('../../js/VPAIDHTML5Client');
 
 describe('VPAIDHTML5Client.js api', function()  {
-    var url = 'http://hello.com/';
+    var url = '/base/js/';
     var frameConfig = {origin: '*', allowed: ['*']};
     var el;
 

@@ -109,7 +109,7 @@ var JSFrameCommunication = require('./JSFrameCommunication');
 
 function VPAIDHTML5iFrame(id, frameConfig) {
     this._frame = new JSFrameCommunication(parent, frameConfig.origin, frameConfig.allowed, id);
-    this._frame.postMessage('event', JSFrameCommunication.HAND_SHAKE_EVENT, [null, 'sucess']);
+    this._frame.postMessage('event', JSFrameCommunication.HAND_SHAKE_EVENT, [null, 'success']);
 }
 
 module.exports = VPAIDHTML5iFrame;
@@ -268,6 +268,15 @@ module.exports.setIframeContent = function setIframeContent(iframeEl, content) {
     iframeDoc.close();
 
     return true;
+};
+
+module.exports.extend = function extend(toExtend, fromSource) {
+  for (var key in fromSource) {
+      if (fromSource.hasOwnProperty(key)) {
+            toExtend[key] = fromSource[key];
+          }
+    }
+  return toExtend;
 };
 
 module.exports.constant = function(value) {

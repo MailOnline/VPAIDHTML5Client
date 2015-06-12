@@ -4,7 +4,7 @@ var fs = require('fs');
 var utils = require('./utils');
 var JSFrameCommunication = require('./JSFrameCommunication');
 var unique = utils.unique('vpaidIframe');
-var template = fs.readFileSync(__dirname + '/iframe.template.html', 'utf8');
+var defaultTemplate = fs.readFileSync(__dirname + '/iframe.template.html', 'utf8');
 
 function VPAIDHTML5Client(el, url, frameConfig, callback) {
     this._destroyed = false;
@@ -17,7 +17,9 @@ function VPAIDHTML5Client(el, url, frameConfig, callback) {
             id: this._id,
             url: url + 'VPAIDHTML5iFrame.js',
             origin: frameConfig.origin,
-            allowed: frameConfig.allowed
+            allowed: frameConfig.allowed,
+            template: frameConfig.template || defaultTemplate,
+            templateConfig: frameConfig.templateConfig
         },
         function(err, result) {
             this._ready = true;
@@ -84,12 +86,15 @@ function _createFrameComm(el, frameConfig, callback) {
 }
 
 function _setFrameContent(iframe, data) {
-    var html = utils.simpleTemplate(template, {
+    var newData = {
         iframeURL_JS: data.url,
         id: data.id,
         origin: data.origin,
         allowedOrigins: data.allowed
-    });
+    };
+
+    var html = utils.simpleTemplate(data.template, utils.extend(newData, data.templateConfig));
+
     setTimeout(function () {
         utils.setIframeContent( iframe, html );
     }, 0);
