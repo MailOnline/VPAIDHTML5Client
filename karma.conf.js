@@ -10,6 +10,7 @@ module.exports = function (karma) {
      */
     files: [
         'js/**/*.js',
+        'test/fixtures/*.js',
         'test/unit/*.js',
         'test/integration/*.js',
     ],

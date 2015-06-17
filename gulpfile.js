@@ -23,8 +23,7 @@ var testPath = 'test/**/**.js';
 var binPath = './bin';
 
 var jsBuilds = [
-    'VPAIDHTML5Client.js',
-    'VPAIDHTML5iFrame.js'
+    'VPAIDHTML5Client.js'
 ].map(function (entry, index) {
 
     var build = watchify(

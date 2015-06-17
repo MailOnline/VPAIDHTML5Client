@@ -9,9 +9,14 @@ module.exports.after = function after(count, handler) {
 
 module.exports.noop = function (){};
 
+module.exports.triggerEvent = function(vpaid, type) {
+    var event = new Event(type);
+    vpaid._frame.dispatchEvent(event);
+}
+
 module.exports.framePostMessage = function (data) {
     var event = new CustomEvent('message');
-    event.origin = '*';
+    event.origin = window.location.origin;
     event.data = JSON.stringify(data);
     window.dispatchEvent(event);
 };

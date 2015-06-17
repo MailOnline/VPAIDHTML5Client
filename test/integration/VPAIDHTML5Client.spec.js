@@ -6,39 +6,40 @@ var getBrowserifyPath = require('../testHelper').getBrowserifyPath;
 var mockPostMessage = require('../testHelper').mockPostMessage;
 var framePostMessage = require('../testHelper').framePostMessage;
 var VPAIDHTML5Client = require('../../js/VPAIDHTML5Client');
-var template = fs.readFileSync(__dirname + '/../iframe.template.html', 'utf8');
+var template = fs.readFileSync(__dirname + '/../fixtures/iframe.template.html', 'utf8');
 
 describe('integration test', function () {
 
     describe('VPAIDHTML5Client <-> VPAIDHTML5iFrame', function()  {
 
-        var el;
-        var url = '/base/js/';
+        var el, video;
         var frameConfig = {
-            origin: '*',
-            allowed: ['*'],
             template: template,
-            templateConfig: {
+            extraOptions: {
                 browserify_JS: getBrowserifyPath()
             }
         };
 
         beforeEach(function () {
             el = document.createElement('div');
+            video = document.createElement('video');
             document.body.appendChild(el);
+            document.body.appendChild(video);
         });
 
         afterEach(function () {
-            document.body.removeChild(el);
+            //document.body.removeChild(el);
+            document.body.removeChild(video);
         });
 
         it('the iframe must call the handshake', function(done) {
             var onLoad = sinon.spy(function () {
                 assert(onLoad.calledOnce);
-                assert.sameDeepMembers(onLoad.getCall(0).args, [null, 'success']);
+                assert.isNull(onLoad.getCall(0).args[0])
                 done();
             });
-            var vpaid = new VPAIDHTML5Client(el, url, frameConfig, onLoad);
+            var vpaid = new VPAIDHTML5Client(el, video, frameConfig);
+            vpaid.loadAdUnit('/base/test/fixtures/simpleVPAIDAd.js', onLoad);
         });
 
     });

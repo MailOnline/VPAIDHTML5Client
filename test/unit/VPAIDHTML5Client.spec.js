@@ -1,17 +1,22 @@
 'use strict';
 
 var noop = require('../testHelper').noop;
-var mockPostMessage = require('../testHelper').mockPostMessage;
 var framePostMessage = require('../testHelper').framePostMessage;
 var VPAIDHTML5Client = require('../../js/VPAIDHTML5Client');
 
 describe('VPAIDHTML5Client.js api', function()  {
-    var url = '/base/js/';
-    var frameConfig = {origin: '*', allowed: ['*']};
-    var el;
+    var el, video;
 
     beforeEach(function () {
-        el = document.createElement('div');
+        el = document.createElement('iframe');
+        video = document.createElement('video');
+        document.body.appendChild(el);
+        document.body.appendChild(video);
+    });
+
+    afterEach(function () {
+        document.body.removeChild(el);
+        document.body.removeChild(video);
     });
 
     it('must exist', function () {
@@ -19,98 +24,83 @@ describe('VPAIDHTML5Client.js api', function()  {
     });
 
     it('must implement getID', function () {
-        var vpaid = new VPAIDHTML5Client(el, url, frameConfig);
+        var vpaid = new VPAIDHTML5Client(el, video);
         assert.isFunction(vpaid.getID, 'must be a function');
         assert.equal(vpaid.getID(), 'vpaidIframe_0');
     });
 
-    it('must call the callback when handshake is done', function (done) {
-        var onLoad = sinon.spy(function () {
-            assert(onLoad.calledOnce);
-            assert.sameDeepMembers(onLoad.getCall(0).args, [null, 'success']);
-            done();
+    describe('loadAdUnit', function () {
+
+        // it('must return adUnit', function (done) {
+        //     var onAdLoad = sinon.spy(function (err, adUnit) {
+        //         assert(onAdLoad.calledOnce);
+        //         assert.isNull(err);
+        //         assert.isNotNull(adUnit);
+        //         done();
+        //     });
+
+        //     var vpaid = new VPAIDHTML5Client(el, video);
+
+        //     assert.isFunction(vpaid.loadAdUnit, 'must be a function');
+        //     vpaid.loadAdUnit('', onAdLoad);
+        //     framePostMessage({id: vpaid.getID(), 'event': 'load'});
+        // });
+
+        it('must timeout', function (done) {
+            var onAdLoad = sinon.spy(function (err, adUnit) {
+                assert(onAdLoad.calledOnce);
+                assert.isNotNull(err);
+                assert.isNull(adUnit);
+                done();
+            });
+
+            var vpaid = new VPAIDHTML5Client(el, video);
+
+            assert.isFunction(vpaid.loadAdUnit, 'must be a function');
+            vpaid.loadAdUnit('', onAdLoad);
         });
-        var vpaid = new VPAIDHTML5Client(el, url, frameConfig, onLoad);
-        framePostMessage({id: vpaid.getID(), type: 'event', typeDetail: 'vpaid_handshake', msg: [null, 'success']});
     });
 
-    it('must implement loadAdUnit', function (done) {
-        var onAdLoad = sinon.spy(function (err, adUnit) {
-            assert(onAdLoad.calledOnce);
-            assert.isNotNull(adUnit);
-            done();
-        });
-
-        var vpaid = new VPAIDHTML5Client(el, url, frameConfig);
-
-        mockPostMessage(vpaid._el, function() {
-            framePostMessage({id: vpaid.getID(), type: 'method', typeDetail: 'loadAdUnit', callbackID: vpaid.getID() + '_0'});
-        }, vpaid._frame);
-
-        assert.isFunction(vpaid.loadAdUnit, 'must be a function');
-        vpaid.loadAdUnit('http://someAd.com/', onAdLoad);
-        framePostMessage({id: vpaid.getID(), type: 'event', typeDetail: 'vpaid_handshake', msg: [null, 'success']});
-    });
 
     it('must implement unLoadAdUnit', function () {
-        var vpaid = new VPAIDHTML5Client(el, url, frameConfig);
+        var vpaid = new VPAIDHTML5Client(el, video);
         assert.isFunction(vpaid.unloadAdUnit, 'must be a function');
     });
 
     describe('destroy', function () {
         it('must implement destroy', function () {
-            var vpaid = new VPAIDHTML5Client(el, url, frameConfig, noop);
+            var vpaid = new VPAIDHTML5Client(el, video);
             assert.isFunction(vpaid.destroy, 'must be a function');
         });
 
         it('must throw when destroyed', function() {
-            var vpaid = new VPAIDHTML5Client(el, url, frameConfig, noop);
+            var vpaid = new VPAIDHTML5Client(el, video);
 
             assert.isFunction(vpaid.destroy, 'must be a function');
             vpaid.destroy();
 
             assert.throw(vpaid.loadAdUnit.bind(vpaid), 'already destroyed', 'must throw an error!');
-            assert.throw(vpaid.getID.bind(vpaid), 'already destroyed', 'must throw an error!');
         });
 
-        it ('must not fire handshake load callback when destroyed', function (done) {
+
+        it ('must not fire adunit load callback when destroyed', function (done) {
             var callback = sinon.spy();
-            var vpaid = new VPAIDHTML5Client(el, url, frameConfig, callback);
+            var vpaid = new VPAIDHTML5Client(el, video);
             var id = vpaid.getID();
 
+            vpaid.loadAdUnit('', callback);
             vpaid.destroy();
-            framePostMessage({id: id, type: 'event', typeDetail: 'vpaid_handshake', msg: [null, 'success']});
+
 
             setTimeout(function () {
                 assert(callback.callCount === 0, 'must not fire callback1 when destroyed!');
                 done();
             }, 0);
         });
-
-        it ('must not fire adunit load callback when destroyed', function (done) {
-            var callback = sinon.spy();
-            var vpaid = new VPAIDHTML5Client(el, url, frameConfig, onLoad);
-            var id = vpaid.getID();
-
-            mockPostMessage(vpaid._el, function() {
-                framePostMessage({id: id, type: 'method', typeDetail: 'loadAdUnit', callbackID: id + '_0'});
-            }, vpaid._frame);
-
-            framePostMessage({id: id, type: 'event', typeDetail: 'vpaid_handshake', msg: [null, 'success']});
-
-            function onLoad () {
-                vpaid.loadAdUnit('http://someAd.com/', callback);
-                vpaid.destroy();
-                setTimeout(function () {
-                    assert(callback.callCount === 0, 'must not fire callback1 when destroyed!');
-                    done();
-                }, 0);
-            }
-        });
     });
 
     it('must implement isDestroyed', function () {
-        var vpaid = new VPAIDHTML5Client(el, url, frameConfig);
+        var vpaid = new VPAIDHTML5Client(el, video);
         assert.isFunction(vpaid.isDestroyed, 'must be a function');
         assert(!vpaid.isDestroyed());
         vpaid.destroy();

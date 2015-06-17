@@ -1,8 +1,49 @@
 'use strict';
 
-module.exports.noop = function noop() {};
+function noop() {};
 
-module.exports.createIframe = function createIframe(parent, url) {
+function validate(isValid, message) {
+    return isValid ? message : null;
+}
+
+var timeouts = {};
+function clearCallbackTimeout(func) {
+    var timeout = timeouts[func];
+    if (timeout) {
+        clearTimeout(timeout);
+    }
+}
+
+function callbackTimeout(timer, onSuccess, onTimeout) {
+    var timeout = setTimeout(function () {
+        onSuccess = noop;
+        onTimeout();
+    }, timer);
+
+    var callback = function () {
+        clearTimeout(timeout);
+        onSuccess.apply(this, arguments);
+    };
+
+    timeouts[callback] = timeout;
+
+    return callback;
+}
+
+function createElementInEl(parent, tagName, id) {
+    var nEl = document.createElement(tagName);
+    if (id) nEl.id = id;
+    parent.appendChild(nEl);
+    return nEl;
+};
+
+function createIframeWithContent(parent, template, data) {
+    var iframe = createIframe(parent);
+    if (!setIframeContent(iframe, simpleTemplate(template, data))) return;
+    return iframe;
+}
+
+function createIframe(parent, url) {
     var nEl = document.createElement('iframe');
     nEl.src = url || 'about:blank';
     nEl.width = 0;
@@ -12,49 +53,54 @@ module.exports.createIframe = function createIframe(parent, url) {
     return nEl;
 };
 
-module.exports.simpleTemplate = function simpleTemplate(template, data) {
+function simpleTemplate(template, data) {
     Object.keys(data).forEach(function (key) {
         template = template.replace(new RegExp('{{' + key + '}}', 'g'), JSON.stringify(data[key]));
     });
     return template;
 };
 
-module.exports.setIframeContent = function setIframeContent(iframeEl, content) {
-    var iframeDoc = getFrameDocument(iframeEl);
+function setIframeContent(iframeEl, content) {
+    var iframeDoc = iframeEl.contentWindow && iframeEl.contentWindow.document;
     if (!iframeDoc) return false;
 
-    iframeDoc.open();
-    iframeDoc.writeln(content);
-    iframeDoc.close();
+    iframeDoc.write(content);
 
     return true;
 };
 
-module.exports.extend = function extend(toExtend, fromSource) {
-  for (var key in fromSource) {
-      if (fromSource.hasOwnProperty(key)) {
-            toExtend[key] = fromSource[key];
-          }
-    }
-  return toExtend;
+function extend(toExtend, fromSource) {
+    Object.keys(fromSource).forEach(function(key) {
+        toExtend[key] = fromSource[key];
+    });
+    return toExtend;
 };
 
-module.exports.constant = function(value) {
+function constant(value) {
     return function () {
         return value;
     };
 };
 
-function getFrameDocument (ifr) {
-    return  ifr.document            ||
-            ifr.contentDocument     ||
-            ifr.contentWindow && ifr.contentWindow.document;
-};
-
-module.exports.unique = function unique(prefix) {
+function unique(prefix) {
     var count = -1;
     return function () {
         return prefix + '_' + (++count);
     };
 };
+
+module.exports = {
+    noop: noop,
+    validate: validate,
+    clearCallbackTimeout: clearCallbackTimeout,
+    callbackTimeout: callbackTimeout,
+    createElementInEl: createElementInEl,
+    createIframeWithContent: createIframeWithContent,
+    createIframe: createIframe,
+    simpleTemplate: simpleTemplate,
+    setIframeContent: setIframeContent,
+    extend: extend,
+    constant: constant,
+    unique: unique
+}
 

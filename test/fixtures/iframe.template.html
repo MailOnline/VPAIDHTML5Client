@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
 </head>
 <body>
     <script type="text/javascript" src={{browserify_JS}}></script>
     <script type="text/javascript" src={{iframeURL_JS}}></script>
-    <script type="text/javascript">
-        var vpaidIframe = new VPAIDHTML5iFrame({{id}}, { origin: {{origin}}, allowed: {{allowedOrigins}} });
+    <script>
+        parent.postMessage('{"event": "ready", "id": {{iframeID}}}', window.location.origin);
     </script>
 </body>
 </html>
