@@ -21,8 +21,11 @@ describe('utils.js api', function () {
         it('must timeout', function () {
             var success = sinon.spy();
             var error = sinon.spy();
+
             utils.callbackTimeout(100, success, error);
+
             clock.tick(100);
+
             assert(error.calledOnce);
             assert(success.notCalled);
         });
@@ -32,20 +35,27 @@ describe('utils.js api', function () {
                 return false;
             });
             var error = sinon.spy();
+
             utils.callbackTimeout(100, success, error)();
+
             assert(success.calledOnce);
             assert(error.notCalled);
+
             clock.tick(100);
             assert(error.calledOnce);
         });
+
         it('must not timeout if success return true', function () {
             var success = sinon.spy(function () {
                 return true;
             });
             var error = sinon.spy();
+
             utils.callbackTimeout(100, success, error)();
+
             assert(success.calledOnce);
             assert(error.notCalled);
+
             clock.tick(100);
             assert(error.notCalled);
         });
