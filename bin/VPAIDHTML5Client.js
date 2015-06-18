@@ -258,6 +258,7 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     );
 
     //TODO rethink the timeout
+    //too much magic
     this._onLoad = utils.callbackTimeout(
         this._vpaidOptions.timeout,
         onLoad.bind(this),
@@ -438,11 +439,6 @@ function extend(toExtend, fromSource) {
     return toExtend;
 };
 
-function constant(value) {
-    return function () {
-        return value;
-    };
-};
 
 function unique(prefix) {
     var count = -1;
@@ -462,7 +458,6 @@ module.exports = {
     simpleTemplate: simpleTemplate,
     setIframeContent: setIframeContent,
     extend: extend,
-    constant: constant,
     unique: unique
 }
 

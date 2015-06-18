@@ -83,11 +83,6 @@ function extend(toExtend, fromSource) {
     return toExtend;
 };
 
-function constant(value) {
-    return function () {
-        return value;
-    };
-};
 
 function unique(prefix) {
     var count = -1;
@@ -107,7 +102,6 @@ module.exports = {
     simpleTemplate: simpleTemplate,
     setIframeContent: setIframeContent,
     extend: extend,
-    constant: constant,
     unique: unique
 }
 

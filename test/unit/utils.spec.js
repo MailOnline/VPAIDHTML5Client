@@ -7,6 +7,50 @@ describe('utils.js api', function () {
         assert.isFunction(utils.noop);
     });
 
+    describe('callbackTimeout', function () {
+        var clock;
+
+        beforeEach(function () {
+            clock = sinon.useFakeTimers();
+        });
+
+        afterEach(function () {
+            clock.restore();
+        });
+
+        it('must timeout', function () {
+            var success = sinon.spy();
+            var error = sinon.spy();
+            utils.callbackTimeout(100, success, error);
+            clock.tick(100);
+            assert(error.calledOnce);
+            assert(success.notCalled);
+        });
+
+        it('must timeout if success return false', function () {
+            var success = sinon.spy(function () {
+                return false;
+            });
+            var error = sinon.spy();
+            utils.callbackTimeout(100, success, error)();
+            assert(success.calledOnce);
+            assert(error.notCalled);
+            clock.tick(100);
+            assert(error.calledOnce);
+        });
+        it('must not timeout if success return true', function () {
+            var success = sinon.spy(function () {
+                return true;
+            });
+            var error = sinon.spy();
+            utils.callbackTimeout(100, success, error)();
+            assert(success.calledOnce);
+            assert(error.notCalled);
+            clock.tick(100);
+            assert(error.notCalled);
+        });
+    });
+
     it('must implement createIframe', function() {
         var url = 'http://hello.com/';
         assert.isFunction(utils.createIframe, 'must be a function');
@@ -60,11 +104,6 @@ describe('utils.js api', function () {
             assert(utils.setIframeContent(frame, content), 'must return true');
             assert.match(frame.contentWindow.document.body.innerHTML, new RegExp(content), 'iframe content must match');
         });
-    });
-
-    it('must implement constant', function () {
-        assert.isFunction(utils.constant, 'must be a function');
-        assert.isFunction(utils.constant('hello'), 'must return a function')
     });
 
     it('must implement unique', function () {
