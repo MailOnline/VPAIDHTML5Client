@@ -1,8 +1,11 @@
 'use strict';
 
+var fs = require('fs');
 var noop = require('../testHelper').noop;
+var getBrowserifyPath = require('../testHelper').getBrowserifyPath;
 var framePostMessage = require('../testHelper').framePostMessage;
 var VPAIDHTML5Client = require('../../js/VPAIDHTML5Client');
+var template = fs.readFileSync(__dirname + '/../fixtures/iframe.template.html', 'utf8');
 
 describe('VPAIDHTML5Client.js api', function()  {
     var el, video;
@@ -31,25 +34,31 @@ describe('VPAIDHTML5Client.js api', function()  {
 
     describe('loadAdUnit', function () {
 
-        // it('must return adUnit', function (done) {
-        //     var onAdLoad = sinon.spy(function (err, adUnit) {
-        //         assert(onAdLoad.calledOnce);
-        //         assert.isNull(err);
-        //         assert.isNotNull(adUnit);
-        //         done();
-        //     });
+        it('must return adUnit', function (done) {
+            var onLoad = sinon.spy(function (err, adUnit) {
+                assert(onLoad.calledOnce);
+                assert.isNull(err);
+                assert.isNotNull(adUnit);
+                done();
+            });
 
-        //     var vpaid = new VPAIDHTML5Client(el, video);
+            var frameConfig = {
+                template: template,
+                extraOptions: {
+                    browserify_JS: getBrowserifyPath()
+                }
+            }
 
-        //     assert.isFunction(vpaid.loadAdUnit, 'must be a function');
-        //     vpaid.loadAdUnit('', onAdLoad);
-        //     framePostMessage({id: vpaid.getID(), 'event': 'load'});
-        // });
+            var vpaid = new VPAIDHTML5Client(el, video, frameConfig);
+
+            assert.isFunction(vpaid.loadAdUnit, 'must be a function');
+            vpaid.loadAdUnit('/base/test/fixtures/fakeVPAIDAd.js', onLoad);
+        });
 
         it('must timeout', function (done) {
-            var onAdLoad = sinon.spy(function (err, adUnit) {
-                assert(onAdLoad.calledOnce);
-                assert.isNotNull(err);
+            var onLoad = sinon.spy(function (err, adUnit) {
+                assert(onLoad.calledOnce);
+                assert.match(err, /^timeout/);
                 assert.isNull(adUnit);
                 done();
             });
@@ -57,7 +66,7 @@ describe('VPAIDHTML5Client.js api', function()  {
             var vpaid = new VPAIDHTML5Client(el, video);
 
             assert.isFunction(vpaid.loadAdUnit, 'must be a function');
-            vpaid.loadAdUnit('', onAdLoad);
+            vpaid.loadAdUnit('', onLoad);
         });
     });
 

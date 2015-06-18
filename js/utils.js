@@ -11,18 +11,25 @@ function clearCallbackTimeout(func) {
     var timeout = timeouts[func];
     if (timeout) {
         clearTimeout(timeout);
+        delete timeouts[func];
     }
 }
 
 function callbackTimeout(timer, onSuccess, onTimeout) {
-    var timeout = setTimeout(function () {
+    var callback, timeout;
+
+    timeout = setTimeout(function () {
         onSuccess = noop;
+        delete timeout[callback]
         onTimeout();
     }, timer);
 
-    var callback = function () {
-        clearTimeout(timeout);
-        onSuccess.apply(this, arguments);
+    callback = function () {
+        // TODO avoid leaking arguments
+        // https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#32-leaking-arguments
+        if (onSuccess.apply(this, arguments)) {
+            clearCallbackTimeout(callback);
+        }
     };
 
     timeouts[callback] = timeout;

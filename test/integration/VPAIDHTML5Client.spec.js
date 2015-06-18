@@ -28,7 +28,7 @@ describe('integration test', function () {
         });
 
         afterEach(function () {
-            //document.body.removeChild(el);
+            document.body.removeChild(el);
             document.body.removeChild(video);
         });
 

@@ -46,33 +46,45 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
         }, this._templateConfig.extraOptions)
     );
 
+    //TODO rethink the timeout
     this._onLoad = utils.callbackTimeout(
         this._vpaidOptions.timeout,
         onLoad.bind(this),
-        onTimeout
+        onTimeout.bind(this)
     );
 
     window.addEventListener('message', this._onLoad);
 
     function onLoad (e) {
+        //don't clear timeout
         if (e.origin !== window.location.origin) return;
 
         var result = JSON.parse(e.data);
 
+        //don't clear timeout
         if (result.id !== this.getID()) return;
 
         var adUnit, error;
-        var createAd = this._frame.contentWindow.getVPAIDAd;
+        if (!this._frame.contentWindow) {
 
-        error = utils.validate(typeof createAd !== 'function', 'the ad didn\'t return a function to create an ad');
+            error = 'the iframe is not anymore in the DOM tree';
+
+        } else {
+            var createAd = this._frame.contentWindow.getVPAIDAd;
+            error = utils.validate(typeof createAd !== 'function', 'the ad didn\'t return a function to create an ad');
+        }
+
         if (!error) {
             adUnit = new VPAIDAdUnit(createAd());
             error = utils.validate(!adUnit.isValidVPAIDAd(), 'the add is not fully complaint with VPAID specification');
         }
 
         this._adUnit = adUnit;
-        callback(error, error ? undefined : adUnit);
         $destroyLoadListener.call(this);
+        callback(error, error ? null : adUnit);
+
+        //clear timeout
+        return true;
     }
 
     function onTimeout() {
@@ -85,7 +97,6 @@ VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
 
     $removeEl.call(this, '_frame');
     $removeEl.call(this, '_adEl');
-
 
     if (this._adUnit) {
         this._adUnit.stopAd();
