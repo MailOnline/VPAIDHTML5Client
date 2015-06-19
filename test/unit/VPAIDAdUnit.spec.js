@@ -165,5 +165,51 @@ describe('VPAIDAdUnit.js api', function () {
 
     });
 
+    describe('setters', function () {
+
+            var clock;
+            beforeEach(function () {
+                clock = sinon.useFakeTimers();
+            });
+
+            afterEach(function() {
+                clock.restore();
+            });
+
+            IVPAIDAdUnit.SETTERS.forEach(function (setterKey) {
+
+                it(setterKey +' should return a value', function() {
+                    var creative = new IVPAIDAdUnit();
+
+                    sinon.stub(creative, setterKey.replace('s', 'g'), function() {
+                        return this._volume;
+                    });
+
+                    var setter = sinon.stub(creative, setterKey, function(value) {
+                        if(sinon.match.number.test(value)) {
+                            this._volume = value;
+                        }else {
+                            throw new Error('TypeError');
+                        }
+                    });
+
+                    var callback1 = sinon.spy();
+                    var callback2 = sinon.spy();
+
+                    var vpaid = new VPAIDAdUnit(creative);
+                    vpaid[setterKey](1, callback1);
+                    vpaid[setterKey]({}, callback2);
+                    clock.tick(1);
+
+                    assert(setter.called, 'must call creative setter ' + setterKey);
+                    assert(setter.getCall(0).calledWith(1), 'must send the value setted');
+                    assert(callback1.calledWith(null, 1), 'must return value setted');
+                    assert.isNotNull(callback2.getCall(0).args[0], 'must return an error');
+                });
+
+        });
+
+    })
+
 });
 

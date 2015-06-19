@@ -121,6 +121,7 @@ function addStaticToInterface(Interface, name, value) {
 
 var IVPAIDAdUnit = require('./IVPAIDAdUnit');
 var checkVPAIDInterface = IVPAIDAdUnit.checkVPAIDInterface;
+var utils = require('./utils');
 var METHODS = IVPAIDAdUnit.METHODS;
 
 function VPAIDAdUnit(VPAIDCreative) {
@@ -207,7 +208,7 @@ IVPAIDAdUnit.GETTERS.forEach(function(getter) {
 });
 
 //setters
-VPAIDAdUnit.prototype.setAdVolume = function setAdVolume(volume) {
+VPAIDAdUnit.prototype.setAdVolume = function setAdVolume(volume, callback) {
     setTimeout(function () {
 
         var result, error = null;
@@ -218,7 +219,9 @@ VPAIDAdUnit.prototype.setAdVolume = function setAdVolume(volume) {
             error = e;
         }
 
-        error = utils.validate(!error && result !== volume, {msg: 'failed to apply volume: ' + volume});
+        if (!error) {
+            error = utils.validate(!error && result !== volume, {msg: 'failed to apply volume: ' + volume});
+        }
         callOrTriggerEvent(callback, error, result);
     }.bind(this), 0);
 };
@@ -235,7 +238,7 @@ function callOrTriggerEvent(callback, error, result) {
 module.exports = VPAIDAdUnit;
 
 
-},{"./IVPAIDAdUnit":1}],3:[function(require,module,exports){
+},{"./IVPAIDAdUnit":1,"./utils":4}],3:[function(require,module,exports){
 'use strict';
 
 
