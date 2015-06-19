@@ -18,25 +18,54 @@ VPAIDAdUnit.prototype.isValidVPAIDAd = function isValidVPAIDAd() {
 }
 
 IVPAIDAdUnit.METHODS.forEach(function(method) {
+    //this methods arguments order are implemented differently from the spec
+    if (method === 'subscribe' || method === 'unsubscribe') return;
     VPAIDAdUnit.prototype[method] = function () {
         var ariaty = IVPAIDAdUnit.prototype[method].length;
-        setTimeout(function () {
-            // TODO avoid leaking arguments
-            // https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#32-leaking-arguments
-            var args = Array.prototype.slice.call(arguments);
-            var callback = (ariaty === args.length) ? args.pop() : undefined;
+        // TODO avoid leaking arguments
+        // https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#32-leaking-arguments
+        var args = Array.prototype.slice.call(arguments);
+        var callback = (ariaty === args.length) ? args.pop() : undefined;
 
-            var result, error;
+        setTimeout(function () {
+            var result, error = null;
             try {
                 this._creative[method].apply(this._creative, args);
             } catch(e) {
                 error = e;
             }
 
-            callOrTriggerEvent(callback, error, result);
-        }, 0);
+            callOrTriggerEvent(callback, error);
+        }.bind(this), 0);
     };
 });
+
+VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
+    setTimeout(function () {
+        var error = null;
+        try {
+            this._creative.subscribe(handler, event, context);
+        } catch (e) {
+            error = e;
+        }
+
+        callOrTriggerEvent(handler, error);
+    }.bind(this), 0);
+};
+
+
+VPAIDAdUnit.prototype.unsubscribe = function(event, handler) {
+    setTimeout(function () {
+        var error = null;
+        try {
+            this._creative.unsubscribe(handler, event);
+        } catch (e) {
+            error = e;
+        }
+
+        callOrTriggerEvent(handler, error);
+    }.bind(this), 0);
+};
 
 //alias
 VPAIDAdUnit.prototype.on = VPAIDAdUnit.prototype.subscribe;
@@ -46,7 +75,7 @@ IVPAIDAdUnit.GETTERS.forEach(function(getter) {
     VPAIDAdUnit.prototype[getter] = function (callback) {
         setTimeout(function () {
 
-            var result, error;
+            var result, error = null;
             try {
                 result = this._creative[getter]();
             } catch(e) {
@@ -54,7 +83,7 @@ IVPAIDAdUnit.GETTERS.forEach(function(getter) {
             }
 
             callOrTriggerEvent(callback, error, result);
-        }, 0);
+        }.bind(this), 0);
     };
 });
 
@@ -62,7 +91,7 @@ IVPAIDAdUnit.GETTERS.forEach(function(getter) {
 VPAIDAdUnit.prototype.setAdVolume = function setAdVolume(volume) {
     setTimeout(function () {
 
-        var result, error;
+        var result, error = null;
         try {
             this._creative.setAdVolume(volume);
             result = this._creative.getAdVolume();
@@ -72,7 +101,7 @@ VPAIDAdUnit.prototype.setAdVolume = function setAdVolume(volume) {
 
         error = utils.validate(!error && result !== volume, {msg: 'failed to apply volume: ' + volume});
         callOrTriggerEvent(callback, error, result);
-    }, 0);
+    }.bind(this), 0);
 };
 
 
