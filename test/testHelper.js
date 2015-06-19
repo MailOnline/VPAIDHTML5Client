@@ -44,3 +44,9 @@ module.exports.mockPostMessage = function (el, handler, context) {
     });
 }
 
+module.exports.implementsProperties = function implements(creative, array) {
+    return array.every(function (key) {
+        return typeof creative[key] === 'function';
+    });
+};
+

@@ -59,7 +59,7 @@ IVPAIDAdUnit.GETTERS.forEach(function(getter) {
 });
 
 //setters
-IVPAIDAdUnit.prototype.setAdVolume = function setAdVolume(volume) {
+VPAIDAdUnit.prototype.setAdVolume = function setAdVolume(volume) {
     setTimeout(function () {
 
         var result, error;

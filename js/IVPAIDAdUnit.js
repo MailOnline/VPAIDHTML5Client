@@ -1,7 +1,5 @@
 'use strict';
 
-var noop = require('./utils').noop;
-
 var METHODS = [
     'handshakeVersion',
     'initAd',
