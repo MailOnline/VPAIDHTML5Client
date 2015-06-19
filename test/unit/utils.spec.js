@@ -19,45 +19,45 @@ describe('utils.js api', function () {
         });
 
         it('must timeout', function () {
-            var success = sinon.spy();
-            var error = sinon.spy();
+            var handler = sinon.spy();
+            var onTimeout = sinon.spy();
 
-            utils.callbackTimeout(100, success, error);
+            utils.callbackTimeout(100, handler, onTimeout);
 
             clock.tick(100);
 
-            assert(error.calledOnce);
-            assert(success.notCalled);
+            assert(onTimeout.calledOnce);
+            assert(handler.notCalled);
         });
 
-        it('must timeout if success return false', function () {
-            var success = sinon.spy(function () {
+        it('must still be able to timeout if handler returns false', function () {
+            var handler = sinon.spy(function () {
                 return false;
             });
-            var error = sinon.spy();
+            var onTimeout = sinon.spy();
 
-            utils.callbackTimeout(100, success, error)();
+            utils.callbackTimeout(100, handler, onTimeout)();
 
-            assert(success.calledOnce);
-            assert(error.notCalled);
+            assert(handler.calledOnce);
+            assert(onTimeout.notCalled);
 
             clock.tick(100);
-            assert(error.calledOnce);
+            assert(onTimeout.calledOnce);
         });
 
-        it('must not timeout if success return true', function () {
-            var success = sinon.spy(function () {
+        it('must not timeout if handler returns true', function () {
+            var handler = sinon.spy(function () {
                 return true;
             });
-            var error = sinon.spy();
+            var onTimeout = sinon.spy();
 
-            utils.callbackTimeout(100, success, error)();
+            utils.callbackTimeout(100, handler, onTimeout)();
 
-            assert(success.calledOnce);
-            assert(error.notCalled);
+            assert(handler.calledOnce);
+            assert(onTimeout.notCalled);
 
             clock.tick(100);
-            assert(error.notCalled);
+            assert(onTimeout.notCalled);
         });
     });
 

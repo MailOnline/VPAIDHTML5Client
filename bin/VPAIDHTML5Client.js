@@ -257,8 +257,7 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
         }, this._templateConfig.extraOptions)
     );
 
-    //TODO rethink the timeout
-    //too much magic
+    //TODO maybe rethink the timeout if is too hidden logic
     this._onLoad = utils.callbackTimeout(
         this._vpaidOptions.timeout,
         onLoad.bind(this),
