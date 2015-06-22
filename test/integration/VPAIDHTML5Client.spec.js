@@ -63,6 +63,15 @@ describe('integration test', function () {
                 return client;
             }
 
+            function createAndLoad(onLoaded) {
+                var createAndLoad = createAndHandshake(function (adUnit) {
+                    adUnit.subscribe('AdLoaded', function() {
+                        onLoaded(adUnit);
+                    });
+                    adUnit.initAd(200, 200, 'normal', -1, {slot: el}, {videoSlot: video, videoSlotCanAutoPlay: true});
+                });
+            }
+
             it('handshake must return version', function(done) {
                 vpaid = createVPAID(function (error, adUnit) {
                     assert.isNull(error);
@@ -83,6 +92,17 @@ describe('integration test', function () {
                     adUnit.initAd(200, 200, 'normal', -1, {slot: el}, {videoSlot: video, videoSlotCanAutoPlay: true});
                 });
             });
+
+            it('must be receive adStarted after startAd is called', function(done) {
+                vpaid = createAndLoad(function(adUnit) {
+                    adUnit.subscribe('AdStarted', function(msg) {
+                        assert.isNotNull(msg);
+                        done();
+                    });
+                    adUnit.startAd();
+                });
+            });
+
         })
     });
 

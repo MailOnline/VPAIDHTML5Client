@@ -21,10 +21,15 @@ LinearAd.prototype.subscribe = function subscribe(handler, event, context) {
     this._subscribers[event].push({callback: handler, context: context});
 };
 
+LinearAd.prototype.initAd = partial($trigger, ['AdLoaded', '']);
 
-LinearAd.prototype.initAd = function initAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars, callback) {
-    $trigger.call(this, 'AdLoaded', 'some message event');
-};
+LinearAd.prototype.startAd = partial($trigger, ['AdStarted', '']);
+
+function partial(func, args) {
+    return function() {
+        func.apply(this, args.concat(arguments));
+    }
+}
 
 function $trigger(event, msg) {
     var subscribers = this._subscribers[event] || [];
