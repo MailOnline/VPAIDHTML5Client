@@ -15,8 +15,6 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
     this._el = utils.createElementInEl(el, 'div', this._id);
     this._frameContainer = utils.createElementInEl(this._el, 'div');
     this._adElContainer = utils.createElementInEl(this._el, 'div');
-    this._adElContainer.style.width = '800px';
-    this._adElContainer.style.height = '400px';
     this._adElContainer.className = 'adEl';
     this._videoEl = video;
     this._vpaidOptions = vpaidOptions || {timeout: 1000};

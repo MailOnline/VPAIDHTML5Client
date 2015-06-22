@@ -8,7 +8,7 @@
 <body>
     hello world
     <div id="myContent"></div>
-    <video width="800" height="400" id="myVideo" controls autoplay>
+    <video width="800" height="400" id="myVideo" controls>
         <source src="http://www.w3schools.com/html/movie.mp4" type="video/mp4">
     </video>
     <script>
@@ -36,6 +36,12 @@
             adUnit.subscribe('AdStarted', function() {
                 console.log('--------------------------------> adStarted');
             });
+            adUnit.subscribe('AdPlaying', function () {
+                console.log('--------------------------------> AdPlaying');
+            })
+            adUnit.subscribe('AdImpression', function () {
+                console.log('--------------------------------> adImpression');
+            })
             adUnit.subscribe('AdVideoStart', function() {
                 console.log('--------------------------------> onAdVideoStart');
             })
