@@ -64,12 +64,14 @@ describe('integration test', function () {
             }
 
             function createAndLoad(onLoaded) {
-                var createAndLoad = createAndHandshake(function (adUnit) {
+                var client = createAndHandshake(function (adUnit) {
                     adUnit.subscribe('AdLoaded', function() {
                         onLoaded(adUnit);
                     });
                     adUnit.initAd(200, 200, 'normal', -1, {slot: el}, {videoSlot: video, videoSlotCanAutoPlay: true});
                 });
+
+                return client;
             }
 
             it('handshake must return version', function(done) {
