@@ -68,7 +68,7 @@ describe('integration test', function () {
                     adUnit.subscribe('AdLoaded', function() {
                         onLoaded(adUnit);
                     });
-                    adUnit.initAd(200, 200, 'normal', -1, {slot: el}, {videoSlot: video, videoSlotCanAutoPlay: true});
+                    adUnit.initAd(200, 200, 'normal', -1);
                 });
 
                 return client;
@@ -91,7 +91,7 @@ describe('integration test', function () {
                         assert.isNotNull(msg);
                         done();
                     });
-                    adUnit.initAd(200, 200, 'normal', -1, {slot: el}, {videoSlot: video, videoSlotCanAutoPlay: true});
+                    adUnit.initAd(200, 200, 'normal', -1);
                 });
             });
 

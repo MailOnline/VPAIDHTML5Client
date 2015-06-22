@@ -66,11 +66,13 @@ describe('VPAIDAdUnit.js api', function () {
             var method = sinon.stub(creative, 'initAd');
             var callback = sinon.spy();
 
+            new VPAIDAdUnit(creative, el, video).initAd(200, 200, 'normal', -1, {}, {videoSlotCanAutoPlay: true}, callback);
             new VPAIDAdUnit(creative).initAd(200, 200, 'normal', -1, {slot: el}, {videoSlot: video, videoSlotCanAutoPlay: true}, callback);
             clock.tick(1);
 
             assert(method.called, 'must call creative initAd');
             assert.deepEqual(method.getCall(0).args, [200, 200, 'normal', -1, {slot: el}, {videoSlot: video, videoSlotCanAutoPlay: true}]);
+            assert.deepEqual(method.getCall(1).args, [200, 200, 'normal', -1, {slot: el}, {videoSlot: video, videoSlotCanAutoPlay: true}]);
         });
 
         it('must pass all arguments to creative subscribe', function() {

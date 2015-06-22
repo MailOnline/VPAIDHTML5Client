@@ -6,7 +6,7 @@
 <body>
     <script type="text/javascript" src={{iframeURL_JS}}></script>
     <script>
-        window.postMessage('{"event": "ready", "id": {{iframeID}}}', window.location.origin);
+        parent.postMessage('{"event": "ready", "id": {{iframeID}}}', window.location.origin);
     </script>
 </body>
 </html>

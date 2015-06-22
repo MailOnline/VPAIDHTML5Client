@@ -124,10 +124,12 @@ var checkVPAIDInterface = IVPAIDAdUnit.checkVPAIDInterface;
 var utils = require('./utils');
 var METHODS = IVPAIDAdUnit.METHODS;
 
-function VPAIDAdUnit(VPAIDCreative) {
+function VPAIDAdUnit(VPAIDCreative, el, video) {
     this._isValid = checkVPAIDInterface(VPAIDCreative);
     if (this._isValid) {
         this._creative = VPAIDCreative;
+        this._el = el;
+        this._videoEl = video;
     }
 }
 
@@ -139,7 +141,14 @@ VPAIDAdUnit.prototype.isValidVPAIDAd = function isValidVPAIDAd() {
 
 IVPAIDAdUnit.METHODS.forEach(function(method) {
     //this methods arguments order are implemented differently from the spec
-    if (method === 'subscribe' || method === 'unsubscribe') return;
+    var ignores = [
+        'subscribe',
+        'unsubscribe',
+        'initAd'
+    ];
+
+    if (ignores.indexOf(method) !== -1) return;
+
     VPAIDAdUnit.prototype[method] = function () {
         var ariaty = IVPAIDAdUnit.prototype[method].length;
         // TODO avoid leaking arguments
@@ -159,6 +168,23 @@ IVPAIDAdUnit.METHODS.forEach(function(method) {
         }.bind(this), 0);
     };
 });
+
+
+VPAIDAdUnit.prototype.initAd = function initAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars, callback) {
+    creativeData = utils.extend({slot: this._el}, creativeData || {})
+    environmentVars = utils.extend({videoSlot: this._videoEl}, environmentVars || {});
+
+    setTimeout(function () {
+        var error;
+        try {
+            this._creative.initAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars);
+        } catch (e) {
+            error = e;
+        }
+
+        callOrTriggerEvent(callback, error);
+    }.bind(this), 0);
+};
 
 VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
     this._creative.subscribe(handler, event, context);
@@ -227,7 +253,7 @@ module.exports = VPAIDAdUnit;
 var utils = require('./utils');
 var unique = utils.unique('vpaidIframe');
 var VPAIDAdUnit = require('./VPAIDAdUnit');
-var defaultTemplate = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body>\n    <script type=\"text/javascript\" src={{iframeURL_JS}}></script>\n    <script>\n        window.postMessage('{\"event\": \"ready\", \"id\": {{iframeID}}}', window.location.origin);\n    </script>\n</body>\n</html>\n";
+var defaultTemplate = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body>\n    <script type=\"text/javascript\" src={{iframeURL_JS}}></script>\n    <script>\n        parent.postMessage('{\"event\": \"ready\", \"id\": {{iframeID}}}', window.location.origin);\n    </script>\n</body>\n</html>\n";
 
 function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
     templateConfig = templateConfig || {};
@@ -238,6 +264,9 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
     this._el = utils.createElementInEl(el, 'div', this._id);
     this._frameContainer = utils.createElementInEl(this._el, 'div');
     this._adElContainer = utils.createElementInEl(this._el, 'div');
+    this._adElContainer.style.width = '800px';
+    this._adElContainer.style.height = '400px';
+    this._adElContainer.className = 'adEl';
     this._videoEl = video;
     this._vpaidOptions = vpaidOptions || {timeout: 1000};
 
@@ -298,7 +327,7 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
         }
 
         if (!error) {
-            adUnit = new VPAIDAdUnit(createAd());
+            adUnit = new VPAIDAdUnit(createAd(), this._adElContainer, this._videoEl);
             error = utils.validate(!adUnit.isValidVPAIDAd(), 'the add is not fully complaint with VPAID specification');
         }
 
@@ -348,7 +377,7 @@ function $removeEl(key, parent) {
 
 function $destroyLoadListener() {
     if (this._onLoad) {
-        window.removeEventListener('load', this._onLoad);
+        window.removeEventListener('message', this._onLoad);
         utils.clearCallbackTimeout(this._onLoad);
         delete this._onLoad;
     }

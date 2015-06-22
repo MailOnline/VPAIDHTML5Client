@@ -104,14 +104,13 @@ describe('VPAIDHTML5Client.js api', function()  {
         });
 
 
-        it ('must not fire adunit load callback when destroyed', function (done) {
+        it('must not fire adunit load callback when destroyed', function (done) {
             var callback = sinon.spy();
             var vpaid = new VPAIDHTML5Client(el, video);
             var id = vpaid.getID();
 
             vpaid.loadAdUnit('', callback);
             vpaid.destroy();
-
 
             setTimeout(function () {
                 assert(callback.callCount === 0, 'must not fire callback1 when destroyed!');
