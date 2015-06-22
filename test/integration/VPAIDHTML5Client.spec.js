@@ -32,7 +32,7 @@ describe('integration test', function () {
             document.body.removeChild(video);
         });
 
-        it('the iframe must call the handshake', function(done) {
+        it('the iframe must handshake', function(done) {
             var onLoad = sinon.spy(function () {
                 assert(onLoad.calledOnce);
                 assert.isNull(onLoad.getCall(0).args[0])
@@ -42,6 +42,48 @@ describe('integration test', function () {
             vpaid.loadAdUnit('/base/test/fixtures/simpleVPAIDAd.js', onLoad);
         });
 
+        //TODO make test of handshake and initad and starting calling getters and setters
+
+        describe('adUnit', function () {
+            var vpaid;
+
+            function createVPAID(onLoad) {
+                var client = new VPAIDHTML5Client(el, video, frameConfig);
+                client.loadAdUnit('/base/test/fixtures/simpleVPAIDAd.js', onLoad);
+                return client;
+            }
+
+            function createAndHandshake(onHandShake) {
+                var client = createVPAID(function(error, adUnit) {
+                    adUnit.handshakeVersion('2.0', function(err) {
+                        assert.isNull(err);
+                        onHandShake(adUnit);
+                    });
+                });
+                return client;
+            }
+
+            it('handshake must return version', function(done) {
+                vpaid = createVPAID(function (error, adUnit) {
+                    assert.isNull(error);
+                    adUnit.handshakeVersion('2.0', function (err, version) {
+                        assert.isNull(err);
+                        assert.isString(version);
+                        done();
+                    });
+                });
+            });
+
+            it('must be receive adLoaded after initAd is called', function(done) {
+                vpaid = createAndHandshake(function(adUnit) {
+                    adUnit.subscribe('AdLoaded', function(msg) {
+                        assert.isNotNull(msg);
+                        done();
+                    });
+                    adUnit.initAd(200, 200, 'normal', -1, {slot: el}, {videoSlot: video, videoSlotCanAutoPlay: true});
+                });
+            });
+        })
     });
 
 });

@@ -33,11 +33,20 @@ describe('VPAIDHTML5Client.js api', function()  {
     });
 
     describe('loadAdUnit', function () {
+        var clock;
+
+        beforeEach(function () {
+            clock = sinon.useFakeTimers();
+        });
+
+        afterEach(function () {
+            clock.restore();
+        });
 
         it('must return adUnit', function (done) {
             var onLoad = sinon.spy(function (err, adUnit) {
                 assert(onLoad.calledOnce);
-                assert.isNull(err);
+                assert.isNull(err, 'error must be null');
                 assert.isNotNull(adUnit);
                 done();
             });
@@ -53,6 +62,7 @@ describe('VPAIDHTML5Client.js api', function()  {
 
             assert.isFunction(vpaid.loadAdUnit, 'must be a function');
             vpaid.loadAdUnit('/base/test/fixtures/fakeVPAIDAd.js', onLoad);
+            clock.tick(200);
         });
 
         it('must timeout', function (done) {
@@ -67,6 +77,8 @@ describe('VPAIDHTML5Client.js api', function()  {
 
             assert.isFunction(vpaid.loadAdUnit, 'must be a function');
             vpaid.loadAdUnit('', onLoad);
+
+            clock.tick(1000);
         });
     });
 

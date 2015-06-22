@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
 </head>
 <body>
+    <script>
+        window.console = window.parent.console; // use parent console that have enhanced by test environment
+    </script>
     <script type="text/javascript" src={{browserify_JS}}></script>
     <script type="text/javascript" src={{iframeURL_JS}}></script>
     <script>

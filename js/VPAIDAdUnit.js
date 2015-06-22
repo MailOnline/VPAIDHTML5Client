@@ -31,41 +31,23 @@ IVPAIDAdUnit.METHODS.forEach(function(method) {
         setTimeout(function () {
             var result, error = null;
             try {
-                this._creative[method].apply(this._creative, args);
+                result = this._creative[method].apply(this._creative, args);
             } catch(e) {
                 error = e;
             }
 
-            callOrTriggerEvent(callback, error);
+            callOrTriggerEvent(callback, error, result);
         }.bind(this), 0);
     };
 });
 
 VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
-    setTimeout(function () {
-        var error = null;
-        try {
-            this._creative.subscribe(handler, event, context);
-        } catch (e) {
-            error = e;
-        }
-
-        callOrTriggerEvent(handler, error);
-    }.bind(this), 0);
+    this._creative.subscribe(handler, event, context);
 };
 
 
 VPAIDAdUnit.prototype.unsubscribe = function(event, handler) {
-    setTimeout(function () {
-        var error = null;
-        try {
-            this._creative.unsubscribe(handler, event);
-        } catch (e) {
-            error = e;
-        }
-
-        callOrTriggerEvent(handler, error);
-    }.bind(this), 0);
+    this._creative.unsubscribe(handler, event);
 };
 
 //alias

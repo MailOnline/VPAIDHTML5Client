@@ -9,9 +9,9 @@ JS iframe wrapper for [VPAID](http://www.iab.net/vpaid).
 
 TODO
 ----
-  - test how will work with a real ad in the demo and test
   - create an fake vpaidAd to use for the demo and test
-  - create adUnit abstraction
+  - test how will work with a real ad in the demo and test
+  - validate better if the postmessage and iframe works across browsers
 
 License
 -------
