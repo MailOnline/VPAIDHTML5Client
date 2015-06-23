@@ -7,7 +7,7 @@
 </head>
 <body>
     hello world
-    <div id="myContent"></div>
+    <div id="myContent" style="width:480px; height:360px; position: relative;"></div>
     <video width="480" height="360" id="myVideo" controls>
         <source src="http://www.w3schools.com/html/movie.mp4" type="video/mp4">
     </video>
@@ -16,16 +16,29 @@
         var video = document.getElementById('myVideo');
         var vpaid = new VPAIDHTML5Client(el, video, {});
         var urls = [
-            'http://cdn-tags.brainient.com/1228/34f8e4e6-e83c-46da-8bf6-a37ae9ed5134/html5/vpaid/embed.js?proto=http',
-            'http://cdn-tags.brainient.com/1228/cba8794a-38a5-448b-ad31-e3f6169645c1/html5/vpaid/embed.js?proto=http',
+                {
+                    url: 'http://cdn-tags.brainient.com/1228/34f8e4e6-e83c-46da-8bf6-a37ae9ed5134/html5/vpaid/embed.js?proto=http',
+                    adParameters: ''
+                },
+                {
+                    url: 'http://cdn-tags.brainient.com/1228/cba8794a-38a5-448b-ad31-e3f6169645c1/html5/vpaid/embed.js?proto=http',
+                    adParameters: ''
+                },
+                {
+                    url: 'http://ryanthompson591.github.io/vpaidExamples/examples/VpaidVideoAd.js',
+                    adParameters: '{"videos":[{"url":"http://video.webmfiles.org/big-buck-bunny_trailer.webm","mimetype":"video/webm"}, {"url":"http://download.wavetlan.com/SVV/Media/HTTP/MP4/ConvertedFiles/Media-Convert/Unsupported/test7.mp4","mimetype":"video/mp4"}], "overlay":"http://ryanthompson591.github.io/vpaidExamples/img/ClickMe.jpg"}'
+                }
+            //
             //'http://ryanthompson591.github.io/vpaidExamples/examples/VpaidCallbackAd.js'
         ];
 
-        function getRandomURL() {
+        function getRandomAd() {
             return urls[Math.round( (urls.length - 1) * Math.random())];
         }
 
-        vpaid.loadAdUnit(getRandomURL(), onLoad);
+        var currentAd = getRandomAd();
+
+        vpaid.loadAdUnit(currentAd.url, onLoad);
 
         function onLoad(err, adUnit) {
             if (err) {
@@ -50,7 +63,7 @@
 
             function onHandShake() {
                 console.log('-------------------------------> onHandShake');
-                adUnit.initAd(480, 360, 'normal', -1, {}, {}, function(err) {
+                adUnit.initAd(480, 360, 'normal', -1, {AdParameters: currentAd.adParameters}, {}, function(err) {
                     console.log(err);
                 });
             }
