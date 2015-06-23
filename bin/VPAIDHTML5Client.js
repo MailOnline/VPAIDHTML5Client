@@ -171,8 +171,11 @@ IVPAIDAdUnit.METHODS.forEach(function(method) {
 
 
 VPAIDAdUnit.prototype.initAd = function initAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars, callback) {
-    creativeData = utils.extend({slot: this._el}, creativeData || {})
-    environmentVars = utils.extend({videoSlot: this._videoEl}, environmentVars || {});
+    creativeData = creativeData || {};
+    environmentVars = utils.extend({
+        slot: this._el,
+        videoSlot: this._videoEl
+    }, environmentVars || {});
 
     setTimeout(function () {
         var error;
