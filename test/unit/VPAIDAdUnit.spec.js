@@ -160,7 +160,7 @@ describe('VPAIDAdUnit.js api', function () {
 
                 assert(getter.called, 'must call creative getter ' + getterKey);
                 assert(callback1.calledWith(null, -1));
-                assert.isNotNull(callback2.getCall(0).args[0], 'must return an error');
+                assert.typeOf(callback2.getCall(0).args[0], 'error', 'must return an error');
             });
 
         });
@@ -206,7 +206,7 @@ describe('VPAIDAdUnit.js api', function () {
                     assert(setter.called, 'must call creative setter ' + setterKey);
                     assert(setter.getCall(0).calledWith(1), 'must send the value setted');
                     assert(callback1.calledWith(null, 1), 'must return value setted');
-                    assert.isNotNull(callback2.getCall(0).args[0], 'must return an error');
+                    assert.typeOf(callback2.getCall(0).args[0], 'error', 'must return an error');
                 });
 
         });

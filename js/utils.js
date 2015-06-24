@@ -3,7 +3,7 @@
 function noop() {};
 
 function validate(isValid, message) {
-    return isValid ? message : null;
+    return isValid ? null : new Error(message);
 }
 
 var timeouts = {};

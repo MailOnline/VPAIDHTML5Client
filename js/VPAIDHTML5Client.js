@@ -72,12 +72,12 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
 
         } else {
             var createAd = this._frame.contentWindow.getVPAIDAd;
-            error = utils.validate(typeof createAd !== 'function', 'the ad didn\'t return a function to create an ad');
+            error = utils.validate(typeof createAd === 'function', 'the ad didn\'t return a function to create an ad');
         }
 
         if (!error) {
             adUnit = new VPAIDAdUnit(createAd(), this._adElContainer, this._videoEl);
-            error = utils.validate(!adUnit.isValidVPAIDAd(), 'the add is not fully complaint with VPAID specification');
+            error = utils.validate(adUnit.isValidVPAIDAd(), 'the add is not fully complaint with VPAID specification');
         }
 
         this._adUnit = adUnit;

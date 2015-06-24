@@ -112,7 +112,7 @@ VPAIDAdUnit.prototype.setAdVolume = function setAdVolume(volume, callback) {
         }
 
         if (!error) {
-            error = utils.validate(!error && result !== volume, {msg: 'failed to apply volume: ' + volume});
+            error = utils.validate(result === volume, 'failed to apply volume: ' + volume);
         }
         callOrTriggerEvent(callback, error, result);
     }.bind(this), 0);

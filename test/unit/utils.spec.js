@@ -7,6 +7,11 @@ describe('utils.js api', function () {
         assert.isFunction(utils.noop);
     });
 
+    it('must implement validate', function () {
+        assert.isNull(utils.validate(true, 'some error message'));
+        assert.typeOf(utils.validate(false, 'some error message'), 'error');
+    });
+
     describe('callbackTimeout', function () {
         var clock;
 

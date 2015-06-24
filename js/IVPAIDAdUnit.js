@@ -62,35 +62,196 @@ var SETTERS = [
 ];
 
 
-function IVPAIDAdUnit() {}
+/**
+ * This callback is displayed as global member. The callback use nodejs error-first callback style
+ * @callback NodeStyleCallback
+ * @param {string|null}
+ * @param {undefined|object}
+ */
 
-//methods
+
+/**
+ * IVPAIDAdUnit
+ *
+ * @param {object} creative
+ * @param {HTMLElement} el
+ * @param {HTMLVideoElement} video
+ */
+function IVPAIDAdUnit(creative, el, video) {}
+
+
+/**
+ * handshakeVersion
+ *
+ * @param {string} VPAIDVersion
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.handshakeVersion = function (VPAIDVersion, callback) {};
+
+/**
+ * initAd
+ *
+ * @param {number} width
+ * @param {number} height
+ * @param {string} viewMode can be 'normal', 'thumbnail' or 'fullscreen'
+ * @param {number} desiredBitrate indicates the desired bitrate in kbps
+ * @param {object} [creativeData] used for additional initialization data
+ * @param {object} [environmentVars] used for passing implementation-specific in js version
+ * @param {NodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.initAd = function(width, height, viewMode, desiredBitrate, creativeData, environmentVars, callback) {};
+
+/**
+ * startAd
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.startAd = function(callback) {};
+
+/**
+ * stopAd
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.stopAd = function(callback) {};
+
+/**
+ * skipAd
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.skipAd = function(callback) {};
+
+/**
+ * resizeAd
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.resizeAd = function(callback) {};
+
+/**
+ * pauseAd
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.pauseAd = function(callback) {};
+
+/**
+ * resumeAd
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.resumeAd = function(callback) {};
+
+/**
+ * expandAd
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.expandAd = function(callback) {};
+
+/**
+ * collapseAd
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.collapseAd = function(callback) {};
+
+/**
+ * subscribe
+ *
+ * @param {string} event
+ * @param {nodeStyleCallback} handler
+ * @param {object} context
+ */
 IVPAIDAdUnit.prototype.subscribe = function(event, handler, context) {};
+
+/**
+ * startAd
+ *
+ * @param {string} event
+ * @param {function} handler
+ */
 IVPAIDAdUnit.prototype.unsubscribe = function(event, handler) {};
 
-//getters
+
+
+/**
+ * getAdLinear
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.getAdLinear = function(callback) {};
+
+/**
+ * getAdWidth
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.getAdWidth = function(callback) {};
+
+/**
+ * getAdHeight
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.getAdHeight = function(callback) {};
+
+/**
+ * getAdExpanded
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.getAdExpanded = function(callback) {};
+
+/**
+ * getAdSkippableState
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.getAdSkippableState = function(callback) {};
+
+/**
+ * getAdRemainingTime
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.getAdRemainingTime = function(callback) {};
+
+/**
+ * getAdDuration
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.getAdDuration = function(callback) {};
+
+/**
+ * getAdVolume
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.getAdVolume = function(callback) {};
+
+/**
+ * getAdCompanions
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.getAdCompanions = function(callback) {};
+
+/**
+ * getAdIcons
+ *
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.getAdIcons = function(callback) {};
 
-//setters
+/**
+ * setAdVolume
+ *
+ * @param {number} volume
+ * @param {nodeStyleCallback} callback
+ */
 IVPAIDAdUnit.prototype.setAdVolume = function(volume, callback) {}
 
 addStaticToInterface(IVPAIDAdUnit, 'METHODS', METHODS);
