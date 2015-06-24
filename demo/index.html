@@ -6,11 +6,12 @@
     <script type="text/javascript" src="/VPAIDHTML5Client.js"></script>
 </head>
 <body>
-    hello world
-    <div id="myContent" style="width:480px; height:360px; position: relative;"></div>
-    <video width="480" height="360" id="myVideo" controls>
-        <source src="http://www.w3schools.com/html/movie.mp4" type="video/mp4">
-    </video>
+    <div style="/*position: relative; width:480px; height:360px;*/">
+        <div id="myContent" style="/*position: absolute; top: 0; left: 0; z-index: 1; width: 480px; height: 360px;*/"></div>
+        <video width="480" height="360" id="myVideo" controls>
+            <source src="http://www.w3schools.com/html/movie.mp4" type="video/mp4">
+        </video>
+    </div>
     <script>
         var el = document.getElementById('myContent');
         var video = document.getElementById('myVideo');
@@ -47,24 +48,48 @@
             }
 
             adUnit.subscribe('AdLoaded', onInit);
-            adUnit.subscribe('AdStarted', function() {
-                console.log('--------------------------------> adStarted');
-            });
-            adUnit.subscribe('AdPlaying', function () {
-                console.log('--------------------------------> AdPlaying');
+
+            [
+                'AdStarted',
+                'AdStopped',
+                'AdSkipped',
+                'AdSkippableStateChange',
+                'AdSizeChange',
+                'AdLinearChange',
+                'AdDurationChange',
+                'AdExpandedChange',
+                'AdRemainingTimeChange', // [Deprecated in 2.0] but will be still fired for backwards compatibility
+                'AdVolumeChange',
+                'AdImpression',
+                'AdVideoStart',
+                'AdVideoFirstQuartile',
+                'AdVideoMidpoint',
+                'AdVideoThirdQuartile',
+                'AdVideoComplete',
+                'AdClickThru',
+                'AdInteraction',
+                'AdUserAcceptInvitation',
+                'AdUserMinimize',
+                'AdUserClose',
+                'AdPaused',
+                'AdPlaying',
+                'AdLog',
+                'AdError',
+                'AdBufferReady', //this event is not in spec
+                'AdPlaybackLikelyToKeepUpChange' //this event is not in spec
+            ].forEach(function(event) {
+                adUnit.subscribe(event, function() {
+                    console.log('---------------------------------------> ' + event, 'arguments:', arguments);
+                })
             })
-            adUnit.subscribe('AdImpression', function () {
-                console.log('--------------------------------> adImpression');
-            })
-            adUnit.subscribe('AdVideoStart', function() {
-                console.log('--------------------------------> onAdVideoStart');
-            })
+
             adUnit.handshakeVersion('2.0', onHandShake);
 
-            function onHandShake() {
+            function onHandShake(error, result) {
                 console.log('-------------------------------> onHandShake');
+                console.log('version:', result);
                 adUnit.initAd(480, 360, 'normal', -1, {AdParameters: currentAd.adParameters}, {}, function(err) {
-                    console.log(err);
+                    console.log('error?', err);
                 });
             }
 
