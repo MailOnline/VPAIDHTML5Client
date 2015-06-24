@@ -1,12 +1,26 @@
 'use strict';
 
+/**
+ * noop a empty function
+ */
 function noop() {};
 
+/**
+ * validate if is not validate will return an Error with the message
+ *
+ * @param {boolean} isValid
+ * @param {string} message
+ */
 function validate(isValid, message) {
     return isValid ? null : new Error(message);
 }
 
 var timeouts = {};
+/**
+ * clearCallbackTimeout
+ *
+ * @param {function} func handler to remove
+ */
 function clearCallbackTimeout(func) {
     var timeout = timeouts[func];
     if (timeout) {
@@ -15,6 +29,13 @@ function clearCallbackTimeout(func) {
     }
 }
 
+/**
+ * callbackTimeout if the onSuccess is not called and returns true in the timelimit then onTimeout will be called
+ *
+ * @param {number} timer
+ * @param {function} onSuccess
+ * @param {function} onTimeout
+ */
 function callbackTimeout(timer, onSuccess, onTimeout) {
     var callback, timeout;
 
@@ -37,6 +58,14 @@ function callbackTimeout(timer, onSuccess, onTimeout) {
     return callback;
 }
 
+
+/**
+ * createElementInEl
+ *
+ * @param {HTMLElement} parent
+ * @param {string} tagName
+ * @param {string} id
+ */
 function createElementInEl(parent, tagName, id) {
     var nEl = document.createElement(tagName);
     if (id) nEl.id = id;
@@ -44,12 +73,25 @@ function createElementInEl(parent, tagName, id) {
     return nEl;
 };
 
+/**
+ * createIframeWithContent
+ *
+ * @param {HTMLElement} parent
+ * @param {string} template simple template using {{var}}
+ * @param {object} data
+ */
 function createIframeWithContent(parent, template, data) {
     var iframe = createIframe(parent);
     if (!setIframeContent(iframe, simpleTemplate(template, data))) return;
     return iframe;
 }
 
+/**
+ * createIframe
+ *
+ * @param {HTMLElement} parent
+ * @param {string} url
+ */
 function createIframe(parent, url) {
     var nEl = document.createElement('iframe');
     nEl.src = url || 'about:blank';
@@ -60,6 +102,12 @@ function createIframe(parent, url) {
     return nEl;
 };
 
+/**
+ * simpleTemplate
+ *
+ * @param {string} template
+ * @param {object} data
+ */
 function simpleTemplate(template, data) {
     Object.keys(data).forEach(function (key) {
         template = template.replace(new RegExp('{{' + key + '}}', 'g'), JSON.stringify(data[key]));
@@ -67,6 +115,12 @@ function simpleTemplate(template, data) {
     return template;
 };
 
+/**
+ * setIframeContent
+ *
+ * @param {HTMLIframeElement} iframeEl
+ * @param content
+ */
 function setIframeContent(iframeEl, content) {
     var iframeDoc = iframeEl.contentWindow && iframeEl.contentWindow.document;
     if (!iframeDoc) return false;
@@ -76,6 +130,13 @@ function setIframeContent(iframeEl, content) {
     return true;
 };
 
+
+/**
+ * extend object with keys from another object
+ *
+ * @param {object} toExtend
+ * @param {object} fromSource
+ */
 function extend(toExtend, fromSource) {
     Object.keys(fromSource).forEach(function(key) {
         toExtend[key] = fromSource[key];
@@ -84,6 +145,11 @@ function extend(toExtend, fromSource) {
 };
 
 
+/**
+ * unique will create a unique string everytime is called, sequentially and prefixed
+ *
+ * @param {string} prefix
+ */
 function unique(prefix) {
     var count = -1;
     return function () {

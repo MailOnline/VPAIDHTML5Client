@@ -6,6 +6,21 @@ var unique = utils.unique('vpaidIframe');
 var VPAIDAdUnit = require('./VPAIDAdUnit');
 var defaultTemplate = fs.readFileSync(__dirname + '/iframe.template.html', 'utf8');
 
+/**
+ * This callback is displayed as global member. The callback use nodejs error-first callback style
+ * @callback NodeStyleCallback
+ * @param {string|null}
+ * @param {undefined|object}
+ */
+
+/**
+ * VPAIDHTML5Client
+ *
+ * @param {HTMLElement} el that will contain the iframe to load adUnit and a el to add to adUnit slot
+ * @param {HTMLVideoElement} video default video element to be used by adUnit
+ * @param {object} [templateConfig] template: html template to be used instead of the default, extraOptions: to be used when rendering the template
+ * @param {object} [vpaidOptions] timeout: when loading adUnit
+ */
 function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
     templateConfig = templateConfig || {};
 
@@ -26,15 +41,30 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
 
 }
 
+/**
+ * destroy
+ *
+ */
 VPAIDHTML5Client.prototype.destroy = function destroy() {
     this._destroyed = true;
     this.unloadAdUnit();
 }
 
+/**
+ * isDestroyed
+ *
+ * @return {boolean}
+ */
 VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
     return this._destroyed;
 }
 
+/**
+ * loadAdUnit
+ *
+ * @param {string} adURL url of the js of the adUnit
+ * @param {nodeStyleCallback} callback
+ */
 VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     $throwIfDestroyed.call(this);
 
@@ -93,6 +123,10 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     }
 }
 
+/**
+ * unloadAdUnit
+ *
+ */
 VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
     $destroyLoadListener.call(this);
 
@@ -106,10 +140,21 @@ VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
 
 }
 
+/**
+ * getID will return the unique id
+ *
+ * @return {string}
+ */
 VPAIDHTML5Client.prototype.getID = function () {
     return this._id;
 }
 
+/**
+ * $removeEl
+ *
+ * @param {string} key
+ * @param {HTMLElement} parent
+ */
 function $removeEl(key, parent) {
     if (this[key]) {
         this[key].parentElement.remove(this[key]);
@@ -117,13 +162,10 @@ function $removeEl(key, parent) {
     }
 }
 
-function $removeEl(key, parent) {
-    if (this[key]) {
-        this[key].parentElement.remove(this[key]);
-        delete this[key];
-    }
-}
-
+/**
+ * $destroyLoadListener
+ *
+ */
 function $destroyLoadListener() {
     if (this._onLoad) {
         window.removeEventListener('message', this._onLoad);
@@ -132,6 +174,10 @@ function $destroyLoadListener() {
     }
 }
 
+/**
+ * $throwIfDestroyed
+ *
+ */
 function $throwIfDestroyed() {
     if (this._destroyed) {
         throw new Error ('VPAIDHTML5Client already destroyed!');

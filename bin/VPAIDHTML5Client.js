@@ -419,6 +419,21 @@ var unique = utils.unique('vpaidIframe');
 var VPAIDAdUnit = require('./VPAIDAdUnit');
 var defaultTemplate = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body>\n    <script type=\"text/javascript\" src={{iframeURL_JS}}></script>\n    <script>\n        parent.postMessage('{\"event\": \"ready\", \"id\": {{iframeID}}}', window.location.origin);\n    </script>\n</body>\n</html>\n";
 
+/**
+ * This callback is displayed as global member. The callback use nodejs error-first callback style
+ * @callback NodeStyleCallback
+ * @param {string|null}
+ * @param {undefined|object}
+ */
+
+/**
+ * VPAIDHTML5Client
+ *
+ * @param {HTMLElement} el that will contain the iframe to load adUnit and a el to add to adUnit slot
+ * @param {HTMLVideoElement} video default video element to be used by adUnit
+ * @param {object} [templateConfig] template: html template to be used instead of the default, extraOptions: to be used when rendering the template
+ * @param {object} [vpaidOptions] timeout: when loading adUnit
+ */
 function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
     templateConfig = templateConfig || {};
 
@@ -439,15 +454,30 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
 
 }
 
+/**
+ * destroy
+ *
+ */
 VPAIDHTML5Client.prototype.destroy = function destroy() {
     this._destroyed = true;
     this.unloadAdUnit();
 }
 
+/**
+ * isDestroyed
+ *
+ * @return {boolean}
+ */
 VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
     return this._destroyed;
 }
 
+/**
+ * loadAdUnit
+ *
+ * @param {string} adURL url of the js of the adUnit
+ * @param {nodeStyleCallback} callback
+ */
 VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     $throwIfDestroyed.call(this);
 
@@ -506,6 +536,10 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     }
 }
 
+/**
+ * unloadAdUnit
+ *
+ */
 VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
     $destroyLoadListener.call(this);
 
@@ -519,10 +553,21 @@ VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
 
 }
 
+/**
+ * getID will return the unique id
+ *
+ * @return {string}
+ */
 VPAIDHTML5Client.prototype.getID = function () {
     return this._id;
 }
 
+/**
+ * $removeEl
+ *
+ * @param {string} key
+ * @param {HTMLElement} parent
+ */
 function $removeEl(key, parent) {
     if (this[key]) {
         this[key].parentElement.remove(this[key]);
@@ -530,13 +575,10 @@ function $removeEl(key, parent) {
     }
 }
 
-function $removeEl(key, parent) {
-    if (this[key]) {
-        this[key].parentElement.remove(this[key]);
-        delete this[key];
-    }
-}
-
+/**
+ * $destroyLoadListener
+ *
+ */
 function $destroyLoadListener() {
     if (this._onLoad) {
         window.removeEventListener('message', this._onLoad);
@@ -545,6 +587,10 @@ function $destroyLoadListener() {
     }
 }
 
+/**
+ * $throwIfDestroyed
+ *
+ */
 function $throwIfDestroyed() {
     if (this._destroyed) {
         throw new Error ('VPAIDHTML5Client already destroyed!');
@@ -558,13 +604,27 @@ window.VPAIDHTML5Client = VPAIDHTML5Client;
 },{"./VPAIDAdUnit":2,"./utils":4}],4:[function(require,module,exports){
 'use strict';
 
+/**
+ * noop a empty function
+ */
 function noop() {};
 
+/**
+ * validate if is not validate will return an Error with the message
+ *
+ * @param {boolean} isValid
+ * @param {string} message
+ */
 function validate(isValid, message) {
     return isValid ? null : new Error(message);
 }
 
 var timeouts = {};
+/**
+ * clearCallbackTimeout
+ *
+ * @param {function} func handler to remove
+ */
 function clearCallbackTimeout(func) {
     var timeout = timeouts[func];
     if (timeout) {
@@ -573,6 +633,13 @@ function clearCallbackTimeout(func) {
     }
 }
 
+/**
+ * callbackTimeout if the onSuccess is not called and returns true in the timelimit then onTimeout will be called
+ *
+ * @param {number} timer
+ * @param {function} onSuccess
+ * @param {function} onTimeout
+ */
 function callbackTimeout(timer, onSuccess, onTimeout) {
     var callback, timeout;
 
@@ -595,6 +662,14 @@ function callbackTimeout(timer, onSuccess, onTimeout) {
     return callback;
 }
 
+
+/**
+ * createElementInEl
+ *
+ * @param {HTMLElement} parent
+ * @param {string} tagName
+ * @param {string} id
+ */
 function createElementInEl(parent, tagName, id) {
     var nEl = document.createElement(tagName);
     if (id) nEl.id = id;
@@ -602,12 +677,25 @@ function createElementInEl(parent, tagName, id) {
     return nEl;
 };
 
+/**
+ * createIframeWithContent
+ *
+ * @param {HTMLElement} parent
+ * @param {string} template simple template using {{var}}
+ * @param {object} data
+ */
 function createIframeWithContent(parent, template, data) {
     var iframe = createIframe(parent);
     if (!setIframeContent(iframe, simpleTemplate(template, data))) return;
     return iframe;
 }
 
+/**
+ * createIframe
+ *
+ * @param {HTMLElement} parent
+ * @param {string} url
+ */
 function createIframe(parent, url) {
     var nEl = document.createElement('iframe');
     nEl.src = url || 'about:blank';
@@ -618,6 +706,12 @@ function createIframe(parent, url) {
     return nEl;
 };
 
+/**
+ * simpleTemplate
+ *
+ * @param {string} template
+ * @param {object} data
+ */
 function simpleTemplate(template, data) {
     Object.keys(data).forEach(function (key) {
         template = template.replace(new RegExp('{{' + key + '}}', 'g'), JSON.stringify(data[key]));
@@ -625,6 +719,12 @@ function simpleTemplate(template, data) {
     return template;
 };
 
+/**
+ * setIframeContent
+ *
+ * @param {HTMLIframeElement} iframeEl
+ * @param content
+ */
 function setIframeContent(iframeEl, content) {
     var iframeDoc = iframeEl.contentWindow && iframeEl.contentWindow.document;
     if (!iframeDoc) return false;
@@ -634,6 +734,13 @@ function setIframeContent(iframeEl, content) {
     return true;
 };
 
+
+/**
+ * extend object with keys from another object
+ *
+ * @param {object} toExtend
+ * @param {object} fromSource
+ */
 function extend(toExtend, fromSource) {
     Object.keys(fromSource).forEach(function(key) {
         toExtend[key] = fromSource[key];
@@ -642,6 +749,11 @@ function extend(toExtend, fromSource) {
 };
 
 
+/**
+ * unique will create a unique string everytime is called, sequentially and prefixed
+ *
+ * @param {string} prefix
+ */
 function unique(prefix) {
     var count = -1;
     return function () {
