@@ -74,9 +74,7 @@
                 'AdPaused',
                 'AdPlaying',
                 'AdLog',
-                'AdError',
-                'AdBufferReady', //this event is not in spec
-                'AdPlaybackLikelyToKeepUpChange' //this event is not in spec
+                'AdError'
             ].forEach(function(event) {
                 adUnit.subscribe(event, function() {
                     console.log('---------------------------------------> ' + event, 'arguments:', arguments);
