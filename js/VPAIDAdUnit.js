@@ -5,6 +5,22 @@ var checkVPAIDInterface = IVPAIDAdUnit.checkVPAIDInterface;
 var utils = require('./utils');
 var METHODS = IVPAIDAdUnit.METHODS;
 
+/**
+ * This callback is displayed as global member. The callback use nodejs error-first callback style
+ * @callback NodeStyleCallback
+ * @param {string|null}
+ * @param {undefined|object}
+ */
+
+
+/**
+ * VPAIDAdUnit
+ * @class
+ *
+ * @param VPAIDCreative
+ * @param {HTMLElement} [el] this will be used in initAd environmentVars.slot if defined
+ * @param {HTMLVideoElement} [video] this will be used in initAd environmentVars.videoSlot if defined
+ */
 function VPAIDAdUnit(VPAIDCreative, el, video) {
     this._isValid = checkVPAIDInterface(VPAIDCreative);
     if (this._isValid) {
@@ -16,6 +32,11 @@ function VPAIDAdUnit(VPAIDCreative, el, video) {
 
 VPAIDAdUnit.prototype = Object.create(IVPAIDAdUnit.prototype);
 
+/**
+ * isValidVPAIDAd will return if the VPAIDCreative passed in constructor is valid or not
+ *
+ * @return {boolean}
+ */
 VPAIDAdUnit.prototype.isValidVPAIDAd = function isValidVPAIDAd() {
     return this._isValid;
 }
@@ -51,6 +72,17 @@ IVPAIDAdUnit.METHODS.forEach(function(method) {
 });
 
 
+/**
+ * initAd concreate implementation
+ *
+ * @param {number} width
+ * @param {number} height
+ * @param {string} viewMode can be 'normal', 'thumbnail' or 'fullscreen'
+ * @param {number} desiredBitrate indicates the desired bitrate in kbps
+ * @param {object} [creativeData] used for additional initialization data
+ * @param {object} [environmentVars] used for passing implementation-specific of js version, if el & video was used in constructor slot & videoSlot will be added to the object
+ * @param {NodeStyleCallback} callback
+ */
 VPAIDAdUnit.prototype.initAd = function initAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars, callback) {
     creativeData = creativeData || {};
     environmentVars = utils.extend({
@@ -70,12 +102,25 @@ VPAIDAdUnit.prototype.initAd = function initAd(width, height, viewMode, desiredB
     }.bind(this), 0);
 };
 
+/**
+ * subscribe
+ *
+ * @param {string} event
+ * @param {nodeStyleCallback} handler
+ * @param {object} context
+ */
 VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
     this._creative.subscribe(handler, event, context);
 };
 
 
-VPAIDAdUnit.prototype.unsubscribe = function(event, handler) {
+/**
+ * unsubscribe
+ *
+ * @param {string} event
+ * @param {nodeStyleCallback} handler
+ */
+VPAIDAdUnit.prototype.unsubscribe = function unsubscribe(event, handler) {
     this._creative.unsubscribe(handler, event);
 };
 
@@ -99,7 +144,12 @@ IVPAIDAdUnit.GETTERS.forEach(function(getter) {
     };
 });
 
-//setters
+/**
+ * setAdVolume
+ *
+ * @param volume
+ * @param {nodeStyleCallback} callback
+ */
 VPAIDAdUnit.prototype.setAdVolume = function setAdVolume(volume, callback) {
     setTimeout(function () {
 

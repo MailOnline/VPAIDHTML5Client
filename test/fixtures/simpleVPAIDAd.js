@@ -11,7 +11,7 @@ IVPAIDAdUnit.METHODS.forEach(function (key) {
 });
 
 LinearAd.prototype.handshakeVersion = function (version) {
-    return '1.1';
+    return '2.0';
 };
 
 LinearAd.prototype.subscribe = function subscribe(handler, event, context) {

@@ -15,6 +15,7 @@ var defaultTemplate = fs.readFileSync(__dirname + '/iframe.template.html', 'utf8
 
 /**
  * VPAIDHTML5Client
+ * @class
  *
  * @param {HTMLElement} el that will contain the iframe to load adUnit and a el to add to adUnit slot
  * @param {HTMLVideoElement} video default video element to be used by adUnit

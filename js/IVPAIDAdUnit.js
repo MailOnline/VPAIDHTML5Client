@@ -73,6 +73,8 @@ var SETTERS = [
 /**
  * IVPAIDAdUnit
  *
+ * @class
+ *
  * @param {object} creative
  * @param {HTMLElement} el
  * @param {HTMLVideoElement} video
@@ -96,7 +98,7 @@ IVPAIDAdUnit.prototype.handshakeVersion = function (VPAIDVersion, callback) {};
  * @param {string} viewMode can be 'normal', 'thumbnail' or 'fullscreen'
  * @param {number} desiredBitrate indicates the desired bitrate in kbps
  * @param {object} [creativeData] used for additional initialization data
- * @param {object} [environmentVars] used for passing implementation-specific in js version
+ * @param {object} [environmentVars] used for passing implementation-specific of js version
  * @param {NodeStyleCallback} callback
  */
 IVPAIDAdUnit.prototype.initAd = function(width, height, viewMode, desiredBitrate, creativeData, environmentVars, callback) {};
