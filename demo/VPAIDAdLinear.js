@@ -19,28 +19,32 @@ var VPAIDAdLinear = function VPAIDAdLinear() {
         desiredBitrate: 256,
         duration: 30,
         expanded: false,
-        height: 0,
-        width: 0,
         icons: '',
         linear: true,
         remainingTime: 10,
         skippableState: false,
         viewMode: 'normal',
         width: 0,
-        volume: 1.0
+        volume: 1.0,
+        size: {
+            height: 0,
+            width: 0
+        }
     }
 
     this._quartileEvents = [
         {event: 'AdVideoStart', position: 0},
         {event: 'AdVideoFirstQuartile', position: 25},
         {event: 'AdVideoMidpoint', position: 50},
+        {event: 'AdSkippableStateChange', position: 65, hook: $enableSkippable.bind(this)},
         {event: 'AdVideoThirdQuartile', position: 75},
         {event: 'AdVideoComplete', position: 100}
     ];
 
-    this._lastQuartilePosition = 0;
+    this._lastQuartilePosition = this._quartileEvents[0];
 
     this._parameters = {};
+    _addCssLink('ad.css');
 };
 
 /**
@@ -64,18 +68,24 @@ VPAIDAdLinear.prototype.handshakeVersion = function (playerVPAIDVersion) {
  * @param {object} environmentVars
  */
 VPAIDAdLinear.prototype.initAd = function initAd(width, height, viewMode, desiredBitrate, creativeData, environmentVars) {
-    this._attributes.width = width;
-    this._attributes.height = height;
+    this._attributes.size.width = width;
+    this._attributes.size.height = height;
     this._attributes.viewMode = viewMode;
     this._attributes.desiredBitrate = desiredBitrate;
+
+    this._slot = environmentVars.slot;
+    this._videoSlot = environmentVars.videoSlot;
+    console.log(this._videoSlot);
 
     try {
         this._parameters = JSON.parse(creativeData.AdParameters);
     } catch (e) {
-        throw new Error('failed to parse creativeData.AdParameters, mandatory for this ad');
+        return $throwError('failed to parse creativeData.AdParameters, mandatory for this ad');
     }
 
-    //TODO: do the rest
+    $setVideoAd.call(this);
+    this._videoSlot.addEventListener('timeupdate', $onVideoUpdated.bind(this), false);
+    this._videoSlot.addEventListener('ended', $onVideoEnded.bind(this), false);
 
     $trigger.call(this, 'AdLoaded');
 };
@@ -85,7 +95,13 @@ VPAIDAdLinear.prototype.initAd = function initAd(width, height, viewMode, desire
  *
  */
 VPAIDAdLinear.prototype.startAd = function() {
-    //TODO
+    this._videoSlot.play();
+    _setSize(this._slot, this._attributes.size);
+    this._slot.className = 'vpaidAdLinear';
+    this._slot.addEventListener('click', $onClickThru.bind(this), false);
+
+
+    $trigger.call(this, 'AdStarted');
 };
 
 /**
@@ -101,7 +117,10 @@ VPAIDAdLinear.prototype.stopAd = function() {
  *
  */
 VPAIDAdLinear.prototype.skipAd = function() {
-    //TODO
+    if (!this._attributes.skippableState) return;
+    //TODO stopAd and remove everything
+
+    $trigger.call(this, 'AdSkipped');
 };
 
 /**
@@ -274,8 +293,47 @@ VPAIDAdLinear.prototype.setAdVolume = function(volume) {
     }
 }
 
+function $enableSkippable() {
+    this._attributes.skippableState = true;
+}
 
-function $trigger(event) {
+function $onVideoUpdated() {
+    var videoSlot = this._videoSlot;
+    var percentPlayed = _mapNumber(0, videoSlot.duration, 0, 100, videoSlot.currentTime);
+    var last = this._lastQuartilePosition;
+
+    if (percentPlayed < last.position) return;
+
+    if (last.hook) last.hook();
+
+    $trigger.call(this, last.event);
+
+    var quartile = this._quartileEvents;
+    this._lastQuartilePosition = quartile[ quartile.indexOf(last) + 1 ];
+}
+
+function $onVideoEnded() {
+    //TODO
+}
+
+function $onClickThru() {
+    var clickThru = this._parameters.clickThru || {
+        url: 'http://www.dailymail.com',
+        playerHandles: false
+    };
+
+    $trigger.call(this, 'AdClickThru', { url: clickThru.url, playerHandles: clickThru.playerHandles });
+
+    if (!clickThru.playerHandles) {
+        window.open(clickThru.url, '_blank');
+    }
+}
+
+function $throwError(msg) {
+    $trigger.call(this, 'AdError', msg);
+}
+
+function $trigger(event, msg) {
     var subscribers = this._subscribers[event] || [];
     subscribers.forEach(function(handlers) {
         if (handlers.context) {
@@ -286,11 +344,58 @@ function $trigger(event) {
     });
 }
 
+function $setVideoAd() {
+    var videoSlot = this._videoSlot;
+
+    if (!videoSlot) {
+        return $throwError.call(this, 'no video');
+    }
+    _setSize(videoSlot, this._attributes.size);
+
+    if (!_setSupportedVideo(videoSlot, this._parameters.videos || [])) {
+        return $throwError.call(this, 'no supported video found');
+    }
+
+}
+
+function _setSize(el, size) {
+    el.setAttribute('width', size.width);
+    el.setAttribute('height', size.height);
+    el.style.width = size.width + 'px';
+    el.style.height = size.height + 'px';
+}
+
+function _setSupportedVideo(videoEl, videos) {
+    var supportedVideos = videos.filter(function (video) {
+        return videoEl.canPlayType(video.mimetype);
+    });
+
+    if (supportedVideos.length === 0) return false;
+
+    videoEl.setAttribute('src', supportedVideos[0].url);
+
+    return true;
+}
+
+function _addCssLink() {
+    var css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'ad.css';
+    parent.document.body.appendChild(css);
+}
+
+function _normNumber(start, end, value) {
+    return (value - start) / (end - start);
+}
+
+function _mapNumber(fromStart, fromEnd, toStart, toEnd, value) {
+    return toStart + (toEnd - toStart) * _normNumber(fromStart, fromEnd, value);
+}
 
 window.getVPAIDAd = function() {
     return new VPAIDAdLinear();
 };
 
-}();
+})();
 
 

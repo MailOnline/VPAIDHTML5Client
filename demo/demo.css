@@ -1,0 +1,12 @@
+iframe {
+    border: 0;
+}
+
+#skipAd {
+    display: none;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 10;
+}
+

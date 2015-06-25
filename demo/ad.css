@@ -1,0 +1,13 @@
+.vpaidAdLinear {
+    background: black;
+    opacity: 0.2;
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+
+.vpaidAdLinear:hover {
+    opacity: .8;
+}
+

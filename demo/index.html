@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>VPAIDHTML5Client</title>
+    <link rel="stylesheet" href="demo.css">
     <script type="text/javascript" src="/VPAIDHTML5Client.js"></script>
 </head>
 <body>
-    <div style="/*position: relative; width:480px; height:360px;*/">
-        <div id="myContent" style="/*position: absolute; top: 0; left: 0; z-index: 1; width: 480px; height: 360px;*/"></div>
+    <div style="position: relative; width:480px; height:360px;">
+        <button id="skipAd">Skip ad</button>
+        <div id="myContent" style="position: absolute; top: 0; left: 0; z-index: 1; width: 480px; height: 360px;"></div>
         <video width="480" height="360" id="myVideo" controls>
             <source src="http://www.w3schools.com/html/movie.mp4" type="video/mp4">
         </video>
@@ -15,8 +17,10 @@
     <script>
         var el = document.getElementById('myContent');
         var video = document.getElementById('myVideo');
+        var skipAd = document.getElementById('skipAd');
         var vpaid = new VPAIDHTML5Client(el, video, {});
         var urls = [
+            /*
                 {
                     url: 'http://cdn-tags.brainient.com/1228/34f8e4e6-e83c-46da-8bf6-a37ae9ed5134/html5/vpaid/embed.js?proto=http',
                     adParameters: ''
@@ -27,7 +31,43 @@
                 },
                 {
                     url: 'http://ryanthompson591.github.io/vpaidExamples/examples/VpaidVideoAd.js',
-                    adParameters: '{"videos":[{"url":"http://video.webmfiles.org/big-buck-bunny_trailer.webm","mimetype":"video/webm"}, {"url":"http://download.wavetlan.com/SVV/Media/HTTP/MP4/ConvertedFiles/Media-Convert/Unsupported/test7.mp4","mimetype":"video/mp4"}], "overlay":"http://ryanthompson591.github.io/vpaidExamples/img/ClickMe.jpg"}'
+                    adParameters: JSON.stringify(
+                        {
+                            videos: [
+                                {
+                                    url: 'http://video.webmfiles.org/big-buck-bunny_trailer.webm',
+                                    mimetype: 'video/webm'
+                                },
+                                {
+                                    url: 'http://download.wavetlan.com/SVV/Media/HTTP/MP4/ConvertedFiles/Media-Convert/Unsupported/test7.mp4',
+                                    mimetype: 'video/mp4'
+                                }
+                            ],
+                            overlay: 'http://ryanthompson591.github.io/vpaidExamples/img/ClickMe.jpg'
+                        }
+                    );
+                },
+                */
+                {
+                    url: '/VPAIDAdLinear.js',
+                    adParameters: JSON.stringify(
+                        {
+                            videos: [
+                                {
+                                    url: 'http://video.webmfiles.org/big-buck-bunny_trailer.webm',
+                                    mimetype: 'video/webm'
+                                },
+                                {
+                                    url: 'http://download.wavetlan.com/SVV/Media/HTTP/MP4/ConvertedFiles/Media-Convert/Unsupported/test7.mp4',
+                                    mimetype: 'video/mp4'
+                                }
+                            ],
+                            clickThru: {
+                                playerHandles: false,
+                                url: 'http://www.dailymail.com'
+                            }
+                        }
+                    )
                 }
             //
             //'http://ryanthompson591.github.io/vpaidExamples/examples/VpaidCallbackAd.js'
@@ -53,7 +93,6 @@
                 'AdStarted',
                 'AdStopped',
                 'AdSkipped',
-                'AdSkippableStateChange',
                 'AdSizeChange',
                 'AdLinearChange',
                 'AdDurationChange',
@@ -66,7 +105,6 @@
                 'AdVideoMidpoint',
                 'AdVideoThirdQuartile',
                 'AdVideoComplete',
-                'AdClickThru',
                 'AdInteraction',
                 'AdUserAcceptInvitation',
                 'AdUserMinimize',
@@ -79,7 +117,24 @@
                 adUnit.subscribe(event, function() {
                     console.log('---------------------------------------> ' + event, 'arguments:', arguments);
                 })
-            })
+            });
+
+            adUnit.subscribe('AdSkippableStateChange', function () {
+                skipAd.style.display = 'block';
+                console.log('---------------------------------------> AdSkippableStateChange', 'arguments:', arguments);
+            });
+
+
+            adUnit.subscribe('AdClickThru', function (result) {
+                console.log('---------------------------------------> AdClickThru', 'result:', result);
+                if (result.playerHandles) {
+                    window.open(result.url, '_blank');
+                }
+            });
+
+            skipAd.addEventListener('click', function() {
+                adUnit.skipAd();
+            });
 
             adUnit.handshakeVersion('2.0', onHandShake);
 
