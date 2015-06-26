@@ -87,7 +87,7 @@ gulp.task('test:dev', function (done) {
 //watch file changes
 gulp.task('watch:demo', function() {
     watchBundle();
-    gulp.watch(['demo/*.html', 'demo/*.css'], reload);
+    gulp.watch(['demo/*'], reload);
     gulp.watch([binPath + '/*.js'], ['test:dev'], reload);
     gulp.watch([testPath], ['test:dev']);
 });

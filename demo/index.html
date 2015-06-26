@@ -90,7 +90,6 @@
             adUnit.subscribe('AdLoaded', onInit);
 
             [
-                'AdStarted',
                 'AdStopped',
                 'AdSkipped',
                 'AdSizeChange',
@@ -132,6 +131,11 @@
                 }
             });
 
+            adUnit.subscribe('AdStarted', function () {
+                console.log('---------------------------------------> AdStarted');
+                adUnit.setAdVolume(0);
+            });
+
             skipAd.addEventListener('click', function() {
                 adUnit.skipAd();
             });
@@ -148,7 +152,9 @@
 
             function onInit() {
                 console.log('------------------------------> AdLoaded');
-                adUnit.startAd();
+                adUnit.startAd(function (error) {
+                    console.log('startAd', error);
+                });
             }
         }
     </script>

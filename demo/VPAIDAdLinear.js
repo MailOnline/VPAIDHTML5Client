@@ -32,6 +32,9 @@ var VPAIDAdLinear = function VPAIDAdLinear() {
         }
     }
 
+    //open interactive panel -> AdExpandedChange, AdInteraction
+    //when close panel -> AdExpandedChange, AdInteraction
+
     this._quartileEvents = [
         {event: 'AdVideoStart', position: 0},
         {event: 'AdVideoFirstQuartile', position: 25},
@@ -75,7 +78,6 @@ VPAIDAdLinear.prototype.initAd = function initAd(width, height, viewMode, desire
 
     this._slot = environmentVars.slot;
     this._videoSlot = environmentVars.videoSlot;
-    console.log(this._videoSlot);
 
     try {
         this._parameters = JSON.parse(creativeData.AdParameters);
@@ -96,10 +98,16 @@ VPAIDAdLinear.prototype.initAd = function initAd(width, height, viewMode, desire
  */
 VPAIDAdLinear.prototype.startAd = function() {
     this._videoSlot.play();
-    _setSize(this._slot, this._attributes.size);
-    this._slot.className = 'vpaidAdLinear';
-    this._slot.addEventListener('click', $onClickThru.bind(this), false);
 
+    this._ui = {};
+    this._ui._buy = _createAndAppend(this._slot, 'div', 'vpaidAdLinear');
+    this._ui._banner = _createAndAppend(this._slot, 'div', 'banner');
+    this._ui._xBtn = _createAndAppend(this._slot, 'button', 'close');
+    this._ui._interact = _createAndAppend(this._slot, 'div', 'interact');
+
+    this._ui._buy.addEventListener('click', $onClickThru.bind(this), false);
+    this._ui._banner.addEventListener('click', $onBanner.bind(this), false);
+    this._ui._xBtn.addEventListener('click', $onClose.bind(this), false);
 
     $trigger.call(this, 'AdStarted');
 };
@@ -109,7 +117,9 @@ VPAIDAdLinear.prototype.startAd = function() {
  *
  */
 VPAIDAdLinear.prototype.stopAd = function() {
-    //TODO
+    //TODO destroy and release
+
+    $trigger.call(this, 'AdStopped');
 };
 
 /**
@@ -118,7 +128,7 @@ VPAIDAdLinear.prototype.stopAd = function() {
  */
 VPAIDAdLinear.prototype.skipAd = function() {
     if (!this._attributes.skippableState) return;
-    //TODO stopAd and remove everything
+    //TODO destroy and release
 
     $trigger.call(this, 'AdSkipped');
 };
@@ -136,7 +146,8 @@ VPAIDAdLinear.prototype.resizeAd = function() {
  *
  */
 VPAIDAdLinear.prototype.pauseAd = function() {
-    //TODO
+    this._videoSlot.pause();
+    $trigger.call(this, 'AdPaused');
 };
 
 /**
@@ -144,7 +155,8 @@ VPAIDAdLinear.prototype.pauseAd = function() {
  *
  */
 VPAIDAdLinear.prototype.resumeAd = function() {
-    //TODO
+    this._videoSlot.play();
+    $trigger.call(this, 'AdPlaying');
 };
 
 /**
@@ -288,9 +300,10 @@ VPAIDAdLinear.prototype.getAdIcons = function getAdIcons() {
  * @param {number} volume  between 0 and 1
  */
 VPAIDAdLinear.prototype.setAdVolume = function(volume) {
-    if (volume < 0 || volume > 1) {
-        throw new Error('volume is not valid');
-    }
+    if (volume < 0 || volume > 1) return$throwError('volume is not valid');
+
+    this._videoSlot.volume = volume;
+    this._attributes.volume = volume;
 }
 
 function $enableSkippable() {
@@ -358,6 +371,20 @@ function $setVideoAd() {
 
 }
 
+function $onBanner() {
+    //TODO
+
+    this._ui._interact.style.display = 'block';
+    this._ui._xBtn.style.display = 'block';
+
+}
+
+function $onClose() {
+    //TODO
+    this._ui._interact.style.display = 'none';
+    this._ui._xBtn.style.display = 'none';
+}
+
 function _setSize(el, size) {
     el.setAttribute('width', size.width);
     el.setAttribute('height', size.height);
@@ -375,6 +402,13 @@ function _setSupportedVideo(videoEl, videos) {
     videoEl.setAttribute('src', supportedVideos[0].url);
 
     return true;
+}
+
+function _createAndAppend(parent, tagName, className) {
+    var el = document.createElement(tagName || 'div');
+    el.className = className || '';
+    parent.appendChild(el);
+    return el;
 }
 
 function _addCssLink() {

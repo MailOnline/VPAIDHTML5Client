@@ -1,13 +1,67 @@
 .vpaidAdLinear {
     background: black;
-    opacity: 0.2;
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 10px;
+    right: 20px;
     cursor: pointer;
+}
+
+.vpaidAdLinear::before {
+    content: 'click to buy';
+    color: white;
+    padding: 3px 5px;
+    display: inline-block;
 }
 
 .vpaidAdLinear:hover {
     opacity: .8;
+}
+
+.banner {
+    background: red;
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    cursor: pointer;
+}
+
+.banner::before {
+    content: 'click to expand the ad';
+    color: white;
+    padding: 3px 5px;
+    display: inline-block;
+}
+
+.close {
+    content 'x';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 4;
+    display: none;
+}
+
+.close::before {
+    content: 'x';
+}
+
+.interact {
+    position: absolute;
+    top: 20px;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: url(http://i.imgur.com/L9QPd0O.gif) 50% 50%;
+    display: none;
+    background-size: cover;
+}
+
+.interact::before {
+    position: absolute;
+    bottom: 10px;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    content: 'buy everything';
 }
 
