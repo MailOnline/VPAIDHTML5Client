@@ -5,7 +5,7 @@ var METHODS = [
     'initAd',
     'startAd',
     'stopAd',
-    'skipAd',
+    'skipAd', // VPAID 2.0 new method
     'resizeAd',
     'pauseAd',
     'resumeAd',
@@ -20,10 +20,10 @@ var EVENTS = [
     'AdStarted',
     'AdStopped',
     'AdSkipped',
-    'AdSkippableStateChange',
-    'AdSizeChange',
+    'AdSkippableStateChange', // VPAID 2.0 new event
+    'AdSizeChange', // VPAID 2.0 new event
     'AdLinearChange',
-    'AdDurationChange',
+    'AdDurationChange', // VPAID 2.0 new event
     'AdExpandedChange',
     'AdRemainingTimeChange', // [Deprecated in 2.0] but will be still fired for backwards compatibility
     'AdVolumeChange',
@@ -34,7 +34,7 @@ var EVENTS = [
     'AdVideoThirdQuartile',
     'AdVideoComplete',
     'AdClickThru',
-    'AdInteraction',
+    'AdInteraction', // VPAID 2.0 new event
     'AdUserAcceptInvitation',
     'AdUserMinimize',
     'AdUserClose',
@@ -46,15 +46,15 @@ var EVENTS = [
 
 var GETTERS = [
     'getAdLinear',
-    'getAdWidth',
-    'getAdHeight',
+    'getAdWidth', // VPAID 2.0 new getter
+    'getAdHeight', // VPAID 2.0 new getter
     'getAdExpanded',
-    'getAdSkippableState',
+    'getAdSkippableState', // VPAID 2.0 new getter
     'getAdRemainingTime',
-    'getAdDuration',
+    'getAdDuration', // VPAID 2.0 new getter
     'getAdVolume',
-    'getAdCompanions',
-    'getAdIcons'
+    'getAdCompanions', // VPAID 2.0 new getter
+    'getAdIcons' // VPAID 2.0 new getter
 ];
 
 var SETTERS = [
@@ -260,8 +260,13 @@ addStaticToInterface(IVPAIDAdUnit, 'METHODS', METHODS);
 addStaticToInterface(IVPAIDAdUnit, 'GETTERS', GETTERS);
 addStaticToInterface(IVPAIDAdUnit, 'SETTERS', SETTERS);
 
+
+var VPAID1_METHODS = METHODS.filter(function(method) {
+    return ['skipAd'].indexOf(method) === -1;
+});
+
 addStaticToInterface(IVPAIDAdUnit, 'checkVPAIDInterface', function checkVPAIDInterface (creative) {
-    var result = METHODS.every(function(key) {
+    var result = VPAID1_METHODS.every(function(key) {
         return typeof creative[key] === 'function';
     });
     return result;
