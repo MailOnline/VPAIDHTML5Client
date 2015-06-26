@@ -100,14 +100,14 @@ VPAIDAdLinear.prototype.startAd = function() {
     this._videoSlot.play();
 
     this._ui = {};
-    this._ui._buy = _createAndAppend(this._slot, 'div', 'vpaidAdLinear');
-    this._ui._banner = _createAndAppend(this._slot, 'div', 'banner');
-    this._ui._xBtn = _createAndAppend(this._slot, 'button', 'close');
-    this._ui._interact = _createAndAppend(this._slot, 'div', 'interact');
+    this._ui.buy = _createAndAppend(this._slot, 'div', 'vpaidAdLinear');
+    this._ui.banner = _createAndAppend(this._slot, 'div', 'banner');
+    this._ui.xBtn = _createAndAppend(this._slot, 'button', 'close');
+    this._ui.interact = _createAndAppend(this._slot, 'div', 'interact');
 
-    this._ui._buy.addEventListener('click', $onClickThru.bind(this), false);
-    this._ui._banner.addEventListener('click', $onBanner.bind(this), false);
-    this._ui._xBtn.addEventListener('click', $onClose.bind(this), false);
+    this._ui.buy.addEventListener('click', $onClickThru.bind(this), false);
+    this._ui.banner.addEventListener('click', $expand.bind(this), false);
+    this._ui.xBtn.addEventListener('click', $collapse.bind(this), false);
 
     $trigger.call(this, 'AdStarted');
 };
@@ -371,18 +371,28 @@ function $setVideoAd() {
 
 }
 
-function $onBanner() {
-    //TODO
+function $expand() {
+    this._ui.interact.style.display = 'block';
+    this._ui.xBtn.style.display = 'block';
 
-    this._ui._interact.style.display = 'block';
-    this._ui._xBtn.style.display = 'block';
+    this._videoSlot.pause();
+    this._attributes.expandAd = true;
+    this._attributes.remainingTime = -2;
 
+    $trigger.call(this, 'AdExpandedChange');
+    $trigger.call(this, 'AdDurationChange');
 }
 
-function $onClose() {
-    //TODO
-    this._ui._interact.style.display = 'none';
-    this._ui._xBtn.style.display = 'none';
+function $collapse() {
+    this._ui.interact.style.display = 'none';
+    this._ui.xBtn.style.display = 'none';
+
+    this._videoSlot.play();
+    this._attributes.expandAd = false;
+    this._attributes.remainingTime = -1;
+
+    $trigger.call(this, 'AdExpandedChange');
+    $trigger.call(this, 'AdDurationChange');
 }
 
 function _setSize(el, size) {
