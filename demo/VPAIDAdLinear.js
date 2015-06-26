@@ -47,7 +47,6 @@ var VPAIDAdLinear = function VPAIDAdLinear() {
     this._lastQuartilePosition = this._quartileEvents[0];
 
     this._parameters = {};
-    _addCssLink('ad.css');
 };
 
 /**
@@ -78,6 +77,7 @@ VPAIDAdLinear.prototype.initAd = function initAd(width, height, viewMode, desire
 
     this._slot = environmentVars.slot;
     this._videoSlot = environmentVars.videoSlot;
+    this._style = _addCssLink('ad.css');
 
     try {
         this._parameters = JSON.parse(creativeData.AdParameters);
@@ -117,8 +117,9 @@ VPAIDAdLinear.prototype.startAd = function() {
  *
  */
 VPAIDAdLinear.prototype.stopAd = function() {
-    //TODO destroy and release
+    if (this._destroyed) return;
 
+    $removeAll.call(this);
     $trigger.call(this, 'AdStopped');
 };
 
@@ -127,10 +128,12 @@ VPAIDAdLinear.prototype.stopAd = function() {
  *
  */
 VPAIDAdLinear.prototype.skipAd = function() {
+    if (this._destroyed) return;
     if (!this._attributes.skippableState) return;
-    //TODO destroy and release
 
+    $removeAll.call(this);
     $trigger.call(this, 'AdSkipped');
+    $trigger.call(this, 'AdStopped');
 };
 
 /**
@@ -311,6 +314,8 @@ function $enableSkippable() {
 }
 
 function $onVideoUpdated() {
+    if (this._destroyed) return;
+
     var videoSlot = this._videoSlot;
     var percentPlayed = _mapNumber(0, videoSlot.duration, 0, 100, videoSlot.currentTime);
     var last = this._lastQuartilePosition;
@@ -326,7 +331,10 @@ function $onVideoUpdated() {
 }
 
 function $onVideoEnded() {
-    //TODO
+    if (this._destroyed) return;
+
+    $removeAll.call(this);
+    $trigger.call(this, 'AdStopped');
 }
 
 function $onClickThru() {
@@ -340,6 +348,14 @@ function $onClickThru() {
     if (!clickThru.playerHandles) {
         window.open(clickThru.url, '_blank');
     }
+}
+
+function $removeAll() {
+    this._destroyed = true;
+    this._videoSlot.src = '';
+    this._style.parentElement.removeChild(this._style);
+    this._slot.innerHTML = '';
+    this._ui = null;
 }
 
 function $throwError(msg) {
@@ -426,6 +442,7 @@ function _addCssLink() {
     css.rel = 'stylesheet';
     css.href = 'ad.css';
     parent.document.body.appendChild(css);
+    return css;
 }
 
 function _normNumber(start, end, value) {
