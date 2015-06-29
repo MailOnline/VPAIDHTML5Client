@@ -49,7 +49,7 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
 VPAIDHTML5Client.prototype.destroy = function destroy() {
     this._destroyed = true;
     this.unloadAdUnit();
-}
+};
 
 /**
  * isDestroyed
@@ -58,7 +58,7 @@ VPAIDHTML5Client.prototype.destroy = function destroy() {
  */
 VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
     return this._destroyed;
-}
+};
 
 /**
  * loadAdUnit
@@ -122,7 +122,7 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     function onTimeout() {
         callback('timeout', null);
     }
-}
+};
 
 /**
  * unloadAdUnit
@@ -139,7 +139,7 @@ VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
         delete this._adUnit;
     }
 
-}
+};
 
 /**
  * getID will return the unique id
@@ -148,7 +148,7 @@ VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
  */
 VPAIDHTML5Client.prototype.getID = function () {
     return this._id;
-}
+};
 
 /**
  * $removeEl
@@ -173,7 +173,7 @@ function $destroyLoadListener() {
         utils.clearCallbackTimeout(this._onLoad);
         delete this._onLoad;
     }
-}
+};
 
 /**
  * $throwIfDestroyed
@@ -183,7 +183,7 @@ function $throwIfDestroyed() {
     if (this._destroyed) {
         throw new Error ('VPAIDHTML5Client already destroyed!');
     }
-}
+};
 
 module.exports = VPAIDHTML5Client;
 window.VPAIDHTML5Client = VPAIDHTML5Client;

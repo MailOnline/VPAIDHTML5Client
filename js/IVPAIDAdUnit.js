@@ -254,7 +254,7 @@ IVPAIDAdUnit.prototype.getAdIcons = function(callback) {};
  * @param {number} volume
  * @param {nodeStyleCallback} callback
  */
-IVPAIDAdUnit.prototype.setAdVolume = function(volume, callback) {}
+IVPAIDAdUnit.prototype.setAdVolume = function(volume, callback) {};
 
 addStaticToInterface(IVPAIDAdUnit, 'METHODS', METHODS);
 addStaticToInterface(IVPAIDAdUnit, 'GETTERS', GETTERS);
@@ -270,7 +270,7 @@ addStaticToInterface(IVPAIDAdUnit, 'checkVPAIDInterface', function checkVPAIDInt
         return typeof creative[key] === 'function';
     });
     return result;
-})
+});
 
 module.exports = IVPAIDAdUnit;
 
