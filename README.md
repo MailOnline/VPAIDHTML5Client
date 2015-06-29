@@ -34,6 +34,38 @@ Running the project
   - `gulp deploy:demo` task used to update githubpage with demo and bin
 
 
+Example of the usage
+--------------------
+
+```javascript
+
+var vpaid = new VPAIDHTML5Client(el, video, {});
+vpaid.loadAdUnit('vpaidAdURL.js', onLoad);
+
+function onLoad(err, adUnit) {
+    if (err) return;
+
+    adUnit.subscribe('AdLoaded', onInit);
+    adUnit.subscribe('AdStarted', onStart);
+
+    adUnit.handshakeVersion('2.0', onHandShake);
+
+    function onHandShake(error, result) {
+        adUnit.initAd(480, 360, 'normal', -1, {AdParameters: currentAd.adParameters}, {});
+    }
+
+    function onInit() {
+        adUnit.startAd();
+    }
+
+    function onStart() {
+        console.log('-> AdStarted');
+    }
+
+}
+
+```
+
 License
 -------
 licensed under the MIT License, Version 2.0. [View the license file](LICENSE.md)
