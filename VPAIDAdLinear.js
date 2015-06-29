@@ -30,7 +30,7 @@ var VPAIDAdLinear = function VPAIDAdLinear() {
             height: 0,
             width: 0
         }
-    }
+    };
 
     //open interactive panel -> AdExpandedChange, AdInteraction
     //when close panel -> AdExpandedChange, AdInteraction
@@ -277,7 +277,7 @@ VPAIDAdLinear.prototype.getAdDuration = function getAdDuration() {
  */
 VPAIDAdLinear.prototype.getAdVolume = function getAdVolume() {
     return this._attributes.volume;
-}
+};
 
 /**
  * getAdCompanions - companions are banners outside the video player to reinforce the ad
@@ -303,11 +303,11 @@ VPAIDAdLinear.prototype.getAdIcons = function getAdIcons() {
  * @param {number} volume  between 0 and 1
  */
 VPAIDAdLinear.prototype.setAdVolume = function(volume) {
-    if (volume < 0 || volume > 1) return$throwError('volume is not valid');
+    if (volume < 0 || volume > 1) return $throwError('volume is not valid');
 
     this._videoSlot.volume = volume;
     this._attributes.volume = volume;
-}
+};
 
 function $enableSkippable() {
     this._attributes.skippableState = true;
@@ -384,12 +384,10 @@ function $setVideoAd() {
     if (!_setSupportedVideo(videoSlot, this._parameters.videos || [])) {
         return $throwError.call(this, 'no supported video found');
     }
-
 }
 
 function $expand() {
-    this._ui.interact.style.display = 'block';
-    this._ui.xBtn.style.display = 'block';
+    $toggleUI.call(this, true);
 
     this._videoSlot.pause();
     this._attributes.expandAd = true;
@@ -400,8 +398,7 @@ function $expand() {
 }
 
 function $collapse() {
-    this._ui.interact.style.display = 'none';
-    this._ui.xBtn.style.display = 'none';
+    $toggleUI.call(this, false);
 
     this._videoSlot.play();
     this._attributes.expandAd = false;
@@ -409,6 +406,15 @@ function $collapse() {
 
     $trigger.call(this, 'AdExpandedChange');
     $trigger.call(this, 'AdDurationChange');
+}
+
+function $toggleUI(show) {
+    this._ui.interact.style.display = getDisplay();
+    this._ui.xBtn.style.display = getDisplay();
+
+    function getDisplay() {
+        return show ? 'block' : 'none';
+    }
 }
 
 function _setSize(el, size) {

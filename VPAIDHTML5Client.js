@@ -255,7 +255,7 @@ IVPAIDAdUnit.prototype.getAdIcons = function(callback) {};
  * @param {number} volume
  * @param {nodeStyleCallback} callback
  */
-IVPAIDAdUnit.prototype.setAdVolume = function(volume, callback) {}
+IVPAIDAdUnit.prototype.setAdVolume = function(volume, callback) {};
 
 addStaticToInterface(IVPAIDAdUnit, 'METHODS', METHODS);
 addStaticToInterface(IVPAIDAdUnit, 'GETTERS', GETTERS);
@@ -271,7 +271,7 @@ addStaticToInterface(IVPAIDAdUnit, 'checkVPAIDInterface', function checkVPAIDInt
         return typeof creative[key] === 'function';
     });
     return result;
-})
+});
 
 module.exports = IVPAIDAdUnit;
 
@@ -326,7 +326,7 @@ VPAIDAdUnit.prototype = Object.create(IVPAIDAdUnit.prototype);
  */
 VPAIDAdUnit.prototype.isValidVPAIDAd = function isValidVPAIDAd() {
     return this._isValid;
-}
+};
 
 IVPAIDAdUnit.METHODS.forEach(function(method) {
     //this methods arguments order are implemented differently from the spec
@@ -474,7 +474,7 @@ module.exports = VPAIDAdUnit;
 var utils = require('./utils');
 var unique = utils.unique('vpaidIframe');
 var VPAIDAdUnit = require('./VPAIDAdUnit');
-var defaultTemplate = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body>\n    <script type=\"text/javascript\" src={{iframeURL_JS}}></script>\n    <script>\n        parent.postMessage('{\"event\": \"ready\", \"id\": {{iframeID}}}', window.location.origin);\n    </script>\n</body>\n</html>\n";
+var defaultTemplate = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body>\n    <script type=\"text/javascript\" src=\"{{iframeURL_JS}}\"></script>\n    <script>\n        parent.postMessage('{\"event\": \"ready\", \"id\": \"{{iframeID}}\"}', window.location.origin);\n    </script>\n</body>\n</html>\n";
 
 /**
  * This callback is displayed as global member. The callback use nodejs error-first callback style
@@ -519,7 +519,7 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
 VPAIDHTML5Client.prototype.destroy = function destroy() {
     this._destroyed = true;
     this.unloadAdUnit();
-}
+};
 
 /**
  * isDestroyed
@@ -528,7 +528,7 @@ VPAIDHTML5Client.prototype.destroy = function destroy() {
  */
 VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
     return this._destroyed;
-}
+};
 
 /**
  * loadAdUnit
@@ -560,7 +560,6 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     function onLoad (e) {
         //don't clear timeout
         if (e.origin !== window.location.origin) return;
-
         var result = JSON.parse(e.data);
 
         //don't clear timeout
@@ -592,7 +591,7 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     function onTimeout() {
         callback('timeout', null);
     }
-}
+};
 
 /**
  * unloadAdUnit
@@ -609,7 +608,7 @@ VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
         delete this._adUnit;
     }
 
-}
+};
 
 /**
  * getID will return the unique id
@@ -618,7 +617,7 @@ VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
  */
 VPAIDHTML5Client.prototype.getID = function () {
     return this._id;
-}
+};
 
 /**
  * $removeEl
@@ -643,7 +642,7 @@ function $destroyLoadListener() {
         utils.clearCallbackTimeout(this._onLoad);
         delete this._onLoad;
     }
-}
+};
 
 /**
  * $throwIfDestroyed
@@ -653,7 +652,7 @@ function $throwIfDestroyed() {
     if (this._destroyed) {
         throw new Error ('VPAIDHTML5Client already destroyed!');
     }
-}
+};
 
 module.exports = VPAIDHTML5Client;
 window.VPAIDHTML5Client = VPAIDHTML5Client;
@@ -665,7 +664,7 @@ window.VPAIDHTML5Client = VPAIDHTML5Client;
 /**
  * noop a empty function
  */
-function noop() {};
+function noop() {}
 
 /**
  * validate if is not validate will return an Error with the message
@@ -733,7 +732,7 @@ function createElementInEl(parent, tagName, id) {
     if (id) nEl.id = id;
     parent.appendChild(nEl);
     return nEl;
-};
+}
 
 /**
  * createIframeWithContent
@@ -762,7 +761,7 @@ function createIframe(parent, url) {
     parent.innerHTML = '';
     parent.appendChild(nEl);
     return nEl;
-};
+}
 
 /**
  * simpleTemplate
@@ -772,10 +771,11 @@ function createIframe(parent, url) {
  */
 function simpleTemplate(template, data) {
     Object.keys(data).forEach(function (key) {
-        template = template.replace(new RegExp('{{' + key + '}}', 'g'), JSON.stringify(data[key]));
+        var value = (typeof value === 'object') ? JSON.stringify(data[key]) : data[key];
+        template = template.replace(new RegExp('{{' + key + '}}', 'g'), value);
     });
     return template;
-};
+}
 
 /**
  * setIframeContent
@@ -790,7 +790,7 @@ function setIframeContent(iframeEl, content) {
     iframeDoc.write(content);
 
     return true;
-};
+}
 
 
 /**
@@ -804,7 +804,7 @@ function extend(toExtend, fromSource) {
         toExtend[key] = fromSource[key];
     });
     return toExtend;
-};
+}
 
 
 /**
@@ -817,7 +817,7 @@ function unique(prefix) {
     return function () {
         return prefix + '_' + (++count);
     };
-};
+}
 
 module.exports = {
     noop: noop,
@@ -831,7 +831,7 @@ module.exports = {
     setIframeContent: setIframeContent,
     extend: extend,
     unique: unique
-}
+};
 
 
 },{}]},{},[3])
