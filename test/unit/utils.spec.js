@@ -72,7 +72,7 @@ describe('utils.js api', function () {
         assert.instanceOf(utils.createIframe(document.createElement('div'), url), HTMLElement, 'must return a HTMLElement');
         assert.equal(utils.createIframe(document.createElement('div'), url).src, url, 'must return a HTMLElement with the src used in the arguments');
 
-        let parentElement = document.createElement('div');
+        var parentElement = document.createElement('div');
         assert.equal(utils.createIframe(parentElement, url).parentElement, parentElement, 'must return a HTMLElement that is a child of the element used in the arguments');
     });
 
