@@ -9,6 +9,12 @@ JS iframe wrapper for [VPAID](http://www.iab.net/vpaid).
 
 [VPAID](http://www.iab.net/vpaid) or *Video Player Ad-Serving Interface Definition*, establishes a common interface between video players and ad units, enabling a rich interactive in-stream ad experience.
 
+The goals of VPAIDHTML5Client are:
+  - common interface for VPAID in different technologies [HTML5](https://github.com/MailOnline/VPAIDHTML5Client) and [FLASH](https://github.com/MailOnline/VPAIDFLASHClient).
+  - handle how to load the VPAID adUnit
+  - be a simple and "stupid" implementation of VPAID
+
+check [videosjs-vast-vpaid](https://github.com/MailOnline/videojs-vast-vpaid) if you need VPAID in [videojs](https://github.com/videojs/video.js)
 
 JS
 --
