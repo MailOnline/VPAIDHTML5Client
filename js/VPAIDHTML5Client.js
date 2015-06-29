@@ -90,7 +90,6 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     function onLoad (e) {
         //don't clear timeout
         if (e.origin !== window.location.origin) return;
-
         var result = JSON.parse(e.data);
 
         //don't clear timeout

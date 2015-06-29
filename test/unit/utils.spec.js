@@ -82,13 +82,13 @@ describe('utils.js api', function () {
         });
 
         it('must handle similar variables', function () {
-            var template = 'hello {{hello}}, {{hello1}}';
-            assert(utils.simpleTemplate(template, {hello1: 'hola', hello1: 'ola'}), 'hello, hola, ola');
+            var template = 'hello, {{hello}}, {{hello1}}';
+            assert.equal(utils.simpleTemplate(template, {hello: 'hola', hello1: 'ola'}), 'hello, hola, ola');
         });
 
         it('must handle repeated variables', function () {
-            var template = 'hello {{hello}}, {{hello}} {{hello1}}';
-            assert(utils.simpleTemplate(template, {hello1: 'hola', hello1: 'ola'}), 'hello, hola, hola, ola');
+            var template = 'hello, {{hello}}, {{hello}}, {{hello1}}';
+            assert.equal(utils.simpleTemplate(template, {hello: 'hola', hello1: 'ola'}), 'hello, hola, hola, ola');
         });
     });
 

@@ -110,7 +110,8 @@ function createIframe(parent, url) {
  */
 function simpleTemplate(template, data) {
     Object.keys(data).forEach(function (key) {
-        template = template.replace(new RegExp('{{' + key + '}}', 'g'), JSON.stringify(data[key]));
+        var value = (typeof value === 'object') ? JSON.stringify(data[key]) : data[key];
+        template = template.replace(new RegExp('{{' + key + '}}', 'g'), value);
     });
     return template;
 }
