@@ -3,6 +3,7 @@
 var gulp = require('gulp');
 var watchify = require('watchify');
 var gutil = require('gulp-util');
+var ghPages = require('gulp-gh-pages');
 
 //server and autoreload
 var browserSync = require('browser-sync');
@@ -107,6 +108,10 @@ gulp.task('serve', ['browserify', 'watch:demo'], function () {
             baseDir: ['demo', binPath]
         }
     });
+});
+
+gulp.task('deploy:demo', ['test:ci', 'browserify'], function() {
+    return gulp.src(['demo/**/*', 'bin/*.js', 'bin/*.map']).pipe(ghPages());
 });
 
 gulp.task('default', ['test:dev', 'browserify', 'watch:test']);
