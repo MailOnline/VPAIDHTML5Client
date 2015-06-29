@@ -8,7 +8,10 @@
   "description": "VPAID HTML5",
   "keywords": [
     "VPAID",
-    "HTML5"
+    "HTML5",
+    "JS",
+    "VIDEO",
+    "IAB"
   ],
   "license": "MIT",
   "ignore": [
