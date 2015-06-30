@@ -18,6 +18,7 @@ var assign = require('lodash').assign;
 
 //test
 var karma = require('karma').server;
+var istanbul = require('browserify-istanbul');
 
 //paths
 var testPath = 'test/**/**.js';
@@ -73,7 +74,22 @@ gulp.task('browserify', jsBuilds.map(function (build) {
 gulp.task('test:ci', function (done) {
     karma.start({
         configFile: __dirname + '/karma.conf.js',
-        browsers: ['Firefox']
+        reporters: ['spec', 'coverage'],
+        browsers: ['Firefox'],
+        browserify: {
+            debug: true,
+            transform: ['brfs', istanbul()]
+        },
+        coverageReporter: {
+            type: 'html',
+            dir: 'coverage/'
+        }
+    }, done);
+});
+
+gulp.task('test:deploy', function (done) {
+    karma.start({
+        configFile: __dirname + '/karma.conf.js'
     }, done);
 });
 
@@ -110,7 +126,7 @@ gulp.task('serve', ['browserify', 'watch:demo'], function () {
     });
 });
 
-gulp.task('deploy:demo', ['test:ci', 'browserify'], function() {
+gulp.task('deploy:demo', ['test:deploy', 'browserify'], function() {
     return gulp.src(['demo/**/*', 'bin/*.js', 'bin/*.map']).pipe(ghPages());
 });
 
