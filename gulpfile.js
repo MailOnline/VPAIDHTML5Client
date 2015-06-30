@@ -81,8 +81,23 @@ gulp.task('test:ci', function (done) {
             transform: ['brfs', istanbul()]
         },
         coverageReporter: {
-            type: 'html',
-            dir: 'coverage/'
+            reporters: [
+                {
+                  type: 'text',
+                  dir: 'coverage/',
+                  file: 'coverage.txt'
+                },
+                {
+                  type: 'html',
+                  dir: 'coverage/'
+                },
+                {
+                  type: 'lcovonly',
+                  dir: 'coverage/',
+                  subdir: '.'
+                },
+                {type: 'text-summary'}
+            ]
         }
     }, done);
 });
