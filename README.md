@@ -1,6 +1,7 @@
 VPAIDHTML5Client
 ================
 [![Code Climate](https://codeclimate.com/github/MailOnline/VPAIDHTML5Client/badges/gpa.svg)](https://codeclimate.com/github/MailOnline/VPAIDHTML5Client)
+[![Test Coverage](https://codeclimate.com/github/MailOnline/VPAIDHTML5Client/badges/coverage.svg)](https://codeclimate.com/github/MailOnline/VPAIDHTML5Client/coverage)
 [![Build Status](https://travis-ci.org/MailOnline/VPAIDHTML5Client.svg?branch=master)](https://travis-ci.org/MailOnline/VPAIDHTML5Client)
 [![devDependency Status](https://david-dm.org/Mailonline/VPAIDHTML5Client/dev-status.svg)](https://david-dm.org/Mailonline/VPAIDHTML5Client#info=devDependencies)
 
