@@ -2,6 +2,7 @@ VPAIDHTML5Client
 ================
 [![Code Climate](https://codeclimate.com/github/MailOnline/VPAIDHTML5Client/badges/gpa.svg)](https://codeclimate.com/github/MailOnline/VPAIDHTML5Client)
 [![Build Status](https://travis-ci.org/MailOnline/VPAIDHTML5Client.svg?branch=master)](https://travis-ci.org/MailOnline/VPAIDHTML5Client)
+[![devDependency Status](https://david-dm.org/Mailonline/VPAIDHTML5Client/dev-status.svg)](https://david-dm.org/Mailonline/VPAIDHTML5Client#info=devDependencies)
 
 About
 -----
@@ -24,7 +25,6 @@ The project uses:
 
 TODO
 ----
-  - create an fake vpaidAd to use for the demo and test
   - test how will work with a real ad in the demo and test
   - validate better if the postmessage and iframe works across browsers
 
