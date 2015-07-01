@@ -1,11 +1,15 @@
 {
   "name": "VPAIDHTML5Client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/MailOnline/VPAIDHTML5Client",
   "authors": [
     "Luis Silva <luis.dasilva@mailonline.co.uk>"
   ],
   "description": "VPAID HTML5",
+  "main": [
+    "bin/VPAIDHTML5Client.js",
+    "bin/VPAIDHTML5Client.js.map"
+  ],
   "keywords": [
     "VPAID",
     "HTML5",
