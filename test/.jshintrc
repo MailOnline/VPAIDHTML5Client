@@ -1,5 +1,5 @@
 {
     "mocha": true,
-    "predef": [ 'assert', 'sinon' ]
+    "predef": [ "assert", "sinon" ]
 }
 
