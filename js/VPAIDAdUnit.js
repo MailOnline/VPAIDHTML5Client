@@ -39,7 +39,7 @@ VPAIDAdUnit.prototype = Object.create(IVPAIDAdUnit.prototype);
  */
 VPAIDAdUnit.prototype.isValidVPAIDAd = function isValidVPAIDAd() {
     return this._isValid;
-}
+};
 
 IVPAIDAdUnit.METHODS.forEach(function(method) {
     //this methods arguments order are implemented differently from the spec

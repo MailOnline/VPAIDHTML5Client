@@ -3,7 +3,7 @@
 /**
  * noop a empty function
  */
-function noop() {};
+function noop() {}
 
 /**
  * validate if is not validate will return an Error with the message
@@ -71,7 +71,7 @@ function createElementInEl(parent, tagName, id) {
     if (id) nEl.id = id;
     parent.appendChild(nEl);
     return nEl;
-};
+}
 
 /**
  * createIframeWithContent
@@ -100,7 +100,7 @@ function createIframe(parent, url) {
     parent.innerHTML = '';
     parent.appendChild(nEl);
     return nEl;
-};
+}
 
 /**
  * simpleTemplate
@@ -110,10 +110,11 @@ function createIframe(parent, url) {
  */
 function simpleTemplate(template, data) {
     Object.keys(data).forEach(function (key) {
-        template = template.replace(new RegExp('{{' + key + '}}', 'g'), JSON.stringify(data[key]));
+        var value = (typeof value === 'object') ? JSON.stringify(data[key]) : data[key];
+        template = template.replace(new RegExp('{{' + key + '}}', 'g'), value);
     });
     return template;
-};
+}
 
 /**
  * setIframeContent
@@ -128,7 +129,7 @@ function setIframeContent(iframeEl, content) {
     iframeDoc.write(content);
 
     return true;
-};
+}
 
 
 /**
@@ -142,7 +143,7 @@ function extend(toExtend, fromSource) {
         toExtend[key] = fromSource[key];
     });
     return toExtend;
-};
+}
 
 
 /**
@@ -155,7 +156,7 @@ function unique(prefix) {
     return function () {
         return prefix + '_' + (++count);
     };
-};
+}
 
 module.exports = {
     noop: noop,
@@ -169,5 +170,5 @@ module.exports = {
     setIframeContent: setIframeContent,
     extend: extend,
     unique: unique
-}
+};
 
