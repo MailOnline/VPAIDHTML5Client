@@ -41,7 +41,7 @@ function callbackTimeout(timer, onSuccess, onTimeout) {
 
     timeout = setTimeout(function () {
         onSuccess = noop;
-        delete timeout[callback]
+        delete timeout[callback];
         onTimeout();
     }, timer);
 
