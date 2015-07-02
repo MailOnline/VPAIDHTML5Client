@@ -106,8 +106,8 @@ VPAIDAdLinear.prototype.startAd = function() {
     this._ui.interact = _createAndAppend(this._slot, 'div', 'interact');
 
     this._ui.buy.addEventListener('click', $onClickThru.bind(this), false);
-    this._ui.banner.addEventListener('click', $expand.bind(this), false);
-    this._ui.xBtn.addEventListener('click', $collapse.bind(this), false);
+    this._ui.banner.addEventListener('click', $toggleExpand.bind(this, true), false);
+    this._ui.xBtn.addEventListener('click', $toggleExpand.bind(this, false), false);
 
     $trigger.call(this, 'AdStarted');
 };
@@ -386,26 +386,23 @@ function $setVideoAd() {
     }
 }
 
-function $expand() {
-    $toggleUI.call(this, true);
+function $toggleExpand(toExpand) {
+    $toggleUI.call(this, toExpand);
+    $togglePlay.call(this, toExpand);
 
-    this._videoSlot.pause();
-    this._attributes.expandAd = true;
-    this._attributes.remainingTime = -2;
+    this._attributes.expandAd = toExpand;
+    this._attributes.remainingTime = toExpand ? -2 : -1;
 
     $trigger.call(this, 'AdExpandedChange');
     $trigger.call(this, 'AdDurationChange');
 }
 
-function $collapse() {
-    $toggleUI.call(this, false);
-
-    this._videoSlot.play();
-    this._attributes.expandAd = false;
-    this._attributes.remainingTime = -1;
-
-    $trigger.call(this, 'AdExpandedChange');
-    $trigger.call(this, 'AdDurationChange');
+function $togglePlay(toPlay) {
+    if (toPlay) {
+        this._videoSlot.pause();
+    } else {
+        this._videoSlot.play();
+    }
 }
 
 function $toggleUI(show) {
