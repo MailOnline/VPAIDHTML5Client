@@ -113,16 +113,30 @@ describe('VPAIDAdUnit.js api', function () {
                 var creative = new IVPAIDAdUnit();
 
                 var method = sinon.stub(creative, methodKey);
-                // method.withArgs({}).throws('TypeError');
 
                 var vpaid = new VPAIDAdUnit(creative);
                 vpaid[methodKey](noop);
-                // new VPAIDAdUnit(creative)[method]({});
                 clock.tick(1);
 
                 assert(method.called, 'must call creative method ' + methodKey);
                 assert.deepEqual(method.getCall(0).args, [], 'must be empty');
-                //todo validate if fires event if no callback is passed
+            });
+
+            it(methodKey +' must be handle when it throws', function() {
+                var creative = new IVPAIDAdUnit();
+
+                var method = sinon.stub(creative, methodKey);
+                method.throws();
+                var handler = sinon.spy();
+
+                var vpaid = new VPAIDAdUnit(creative);
+                vpaid.subscribe('error', handler);
+                vpaid[methodKey]();
+                clock.tick(100);
+
+                console.log(method.called);
+
+                assert(handler.called, 'must handle the error when no callback');
             });
 
         });

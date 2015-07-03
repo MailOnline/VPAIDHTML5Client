@@ -1,9 +1,11 @@
 'use strict';
 
 var IVPAIDAdUnit = require('./IVPAIDAdUnit');
+var Subscriber = require('./subscriber');
 var checkVPAIDInterface = IVPAIDAdUnit.checkVPAIDInterface;
 var utils = require('./utils');
 var METHODS = IVPAIDAdUnit.METHODS;
+var ERROR = 'error';
 
 /**
  * This callback is displayed as global member. The callback use nodejs error-first callback style
@@ -27,6 +29,7 @@ function VPAIDAdUnit(VPAIDCreative, el, video) {
         this._creative = VPAIDCreative;
         this._el = el;
         this._videoEl = video;
+        this._subscribers = new Subscriber();
     }
 }
 
@@ -42,7 +45,7 @@ VPAIDAdUnit.prototype.isValidVPAIDAd = function isValidVPAIDAd() {
 };
 
 IVPAIDAdUnit.METHODS.forEach(function(method) {
-    //this methods arguments order are implemented differently from the spec
+    //NOTE: this methods arguments order are implemented differently from the spec
     var ignores = [
         'subscribe',
         'unsubscribe',
@@ -64,9 +67,10 @@ IVPAIDAdUnit.METHODS.forEach(function(method) {
                 result = this._creative[method].apply(this._creative, args);
             } catch(e) {
                 error = e;
+                console.log('errro', e);
             }
 
-            callOrTriggerEvent(callback, error, result);
+            callOrTriggerEvent(callback, this._subscribers, error, result);
         }.bind(this), 0);
     };
 });
@@ -98,7 +102,7 @@ VPAIDAdUnit.prototype.initAd = function initAd(width, height, viewMode, desiredB
             error = e;
         }
 
-        callOrTriggerEvent(callback, error);
+        callOrTriggerEvent(callback, this._subscribers, error);
     }.bind(this), 0);
 };
 
@@ -110,7 +114,7 @@ VPAIDAdUnit.prototype.initAd = function initAd(width, height, viewMode, desiredB
  * @param {object} context
  */
 VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
-    this._creative.subscribe(handler, event, context);
+    $getSubscriber.call(this, event).subscribe(handler, event, context);
 };
 
 
@@ -121,7 +125,7 @@ VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
  * @param {nodeStyleCallback} handler
  */
 VPAIDAdUnit.prototype.unsubscribe = function unsubscribe(event, handler) {
-    this._creative.unsubscribe(handler, event);
+    $getSubscriber.call(this, event).unsubscribe(handler, event);
 };
 
 //alias
@@ -139,7 +143,7 @@ IVPAIDAdUnit.GETTERS.forEach(function(getter) {
                 error = e;
             }
 
-            callOrTriggerEvent(callback, error, result);
+            callOrTriggerEvent(callback, this._subscribers, error, result);
         }.bind(this), 0);
     };
 });
@@ -164,16 +168,25 @@ VPAIDAdUnit.prototype.setAdVolume = function setAdVolume(volume, callback) {
         if (!error) {
             error = utils.validate(result === volume, 'failed to apply volume: ' + volume);
         }
-        callOrTriggerEvent(callback, error, result);
+        callOrTriggerEvent(callback, this._subscribers, error, result);
     }.bind(this), 0);
 };
 
+VPAIDAdUnit.prototype._destroy = function destroy() {
+    this.stopAd();
+    this._subscribers.unsubscribeAll();
+};
 
-function callOrTriggerEvent(callback, error, result) {
+function $getSubscriber(eventName) {
+    return (eventName === ERROR) ? this._subscribers : this._creative;
+}
+
+function callOrTriggerEvent(callback, subscribers, error, result) {
     if (callback) {
         callback(error, result);
     } else if (error) {
-        //todo use error subscribe
+        console.log('hello');
+        subscribers.trigger(ERROR, error);
     }
 }
 
