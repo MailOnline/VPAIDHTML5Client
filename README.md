@@ -1,5 +1,6 @@
 VPAIDHTML5Client
 ================
+[![bitHound Score](https://www.bithound.io/github/MailOnline/VPAIDHTML5Client/badges/score.svg)](https://www.bithound.io/github/MailOnline/VPAIDHTML5Client/master)
 [![Code Climate](https://codeclimate.com/github/MailOnline/VPAIDHTML5Client/badges/gpa.svg)](https://codeclimate.com/github/MailOnline/VPAIDHTML5Client)
 [![Test Coverage](https://codeclimate.com/github/MailOnline/VPAIDHTML5Client/badges/coverage.svg)](https://codeclimate.com/github/MailOnline/VPAIDHTML5Client/coverage)
 [![Build Status](https://travis-ci.org/MailOnline/VPAIDHTML5Client.svg?branch=master)](https://travis-ci.org/MailOnline/VPAIDHTML5Client)

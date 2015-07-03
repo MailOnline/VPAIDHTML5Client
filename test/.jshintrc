@@ -1,0 +1,5 @@
+{
+    "mocha": true,
+    "predef": [ "assert", "sinon" ]
+}
+

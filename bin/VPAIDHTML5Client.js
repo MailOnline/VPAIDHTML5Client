@@ -558,6 +558,7 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     window.addEventListener('message', this._onLoad);
 
     function onLoad (e) {
+        /*jshint validthis: false */
         //don't clear timeout
         if (e.origin !== window.location.origin) return;
         var result = JSON.parse(e.data);
@@ -565,13 +566,13 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
         //don't clear timeout
         if (result.id !== this.getID()) return;
 
-        var adUnit, error;
+        var adUnit, error, createAd;
         if (!this._frame.contentWindow) {
 
             error = 'the iframe is not anymore in the DOM tree';
 
         } else {
-            var createAd = this._frame.contentWindow.getVPAIDAd;
+            createAd = this._frame.contentWindow.getVPAIDAd;
             error = utils.validate(typeof createAd === 'function', 'the ad didn\'t return a function to create an ad');
         }
 
@@ -642,7 +643,7 @@ function $destroyLoadListener() {
         utils.clearCallbackTimeout(this._onLoad);
         delete this._onLoad;
     }
-};
+}
 
 /**
  * $throwIfDestroyed
@@ -652,7 +653,7 @@ function $throwIfDestroyed() {
     if (this._destroyed) {
         throw new Error ('VPAIDHTML5Client already destroyed!');
     }
-};
+}
 
 module.exports = VPAIDHTML5Client;
 window.VPAIDHTML5Client = VPAIDHTML5Client;
@@ -702,7 +703,7 @@ function callbackTimeout(timer, onSuccess, onTimeout) {
 
     timeout = setTimeout(function () {
         onSuccess = noop;
-        delete timeout[callback]
+        delete timeout[callback];
         onTimeout();
     }, timer);
 
