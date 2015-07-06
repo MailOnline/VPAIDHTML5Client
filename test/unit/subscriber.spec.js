@@ -46,8 +46,8 @@ describe('subscriber.js api', function () {
                 subscriber.subscribe(f2, 'test', this);
                 subscriber.subscribe(f3, 'test1', this);
 
-                assert.lengthOf(subscriber._subscribers['test'], 2);
-                assert.lengthOf(subscriber._subscribers['test1'], 1);
+                assert.lengthOf(subscriber._subscribers.test, 2);
+                assert.lengthOf(subscriber._subscribers.test1, 1);
 
                 assert.sameDeepMembers(subscriber.get('test'), [{handler: f1, context: this}, {handler: f2, context: this}]);
                 assert.sameDeepMembers(subscriber.get('test1'), [{handler: f3, context: this}]);
