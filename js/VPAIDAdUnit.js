@@ -67,7 +67,6 @@ IVPAIDAdUnit.METHODS.forEach(function(method) {
                 result = this._creative[method].apply(this._creative, args);
             } catch(e) {
                 error = e;
-                console.log('errro', e);
             }
 
             callOrTriggerEvent(callback, this._subscribers, error, result);
@@ -185,7 +184,6 @@ function callOrTriggerEvent(callback, subscribers, error, result) {
     if (callback) {
         callback(error, result);
     } else if (error) {
-        console.log('hello');
         subscribers.trigger(ERROR, error);
     }
 }

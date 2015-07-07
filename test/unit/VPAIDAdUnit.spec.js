@@ -134,8 +134,6 @@ describe('VPAIDAdUnit.js api', function () {
                 vpaid[methodKey]();
                 clock.tick(100);
 
-                console.log(method.called);
-
                 assert(handler.called, 'must handle the error when no callback');
             });
 

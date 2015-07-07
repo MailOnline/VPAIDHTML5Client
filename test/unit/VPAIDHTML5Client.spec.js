@@ -9,6 +9,12 @@ var template = fs.readFileSync(__dirname + '/../fixtures/iframe.template.html', 
 
 describe('VPAIDHTML5Client.js api', function()  {
     var el, video;
+    var frameConfig = {
+        template: template,
+        extraOptions: {
+            browserify_JS: getBrowserifyPath()
+        }
+    };
 
     beforeEach(function () {
         el = document.createElement('iframe');
@@ -51,13 +57,6 @@ describe('VPAIDHTML5Client.js api', function()  {
                 done();
             });
 
-            var frameConfig = {
-                template: template,
-                extraOptions: {
-                    browserify_JS: getBrowserifyPath()
-                }
-            }
-
             var vpaid = new VPAIDHTML5Client(el, video, frameConfig);
 
             assert.isFunction(vpaid.loadAdUnit, 'must be a function');
@@ -79,6 +78,44 @@ describe('VPAIDHTML5Client.js api', function()  {
             vpaid.loadAdUnit('', onLoad);
 
             clock.tick(1000);
+        });
+
+        it('must remove previous callback when request another VPAIDAd', function (done){
+            var onLoad = sinon.spy(function (err, adUnit) {
+                assert(onLoad.calledOnce);
+                assert.isNull(err, 'error must be null');
+                assert.isNotNull(adUnit);
+                done();
+            });
+
+            var vpaid = new VPAIDHTML5Client(el, video, frameConfig);
+
+            vpaid.loadAdUnit('/base/test/fixtures/fakeVPAIDAd.js', onLoad);
+            vpaid.loadAdUnit('/base/test/fixtures/fakeVPAIDAd.js', onLoad);
+            clock.tick(500);
+        });
+
+        it('must remove previous adUnit when request another VPAIDAd', function (done){
+
+            var vpaid = new VPAIDHTML5Client(el, video, frameConfig);
+
+            vpaid.loadAdUnit('/base/test/fixtures/fakeVPAIDAd.js', function (err, firstAd) {
+
+                assert.isNotNull(firstAd);
+                sinon.spy(firstAd, 'stopAd');
+
+                vpaid.loadAdUnit('/base/test/fixtures/fakeVPAIDAd.js', function(err, secondAd) {
+
+                    assert.isNotNull(secondAd);
+                    assert(firstAd.stopAd.called);
+                    done();
+
+                });
+
+                clock.tick(500);
+            });
+
+            clock.tick(500);
         });
     });
 
@@ -106,10 +143,10 @@ describe('VPAIDHTML5Client.js api', function()  {
 
         it('must not fire adunit load callback when destroyed', function (done) {
             var callback = sinon.spy();
-            var vpaid = new VPAIDHTML5Client(el, video);
+            var vpaid = new VPAIDHTML5Client(el, video, frameConfig);
             var id = vpaid.getID();
 
-            vpaid.loadAdUnit('', callback);
+            vpaid.loadAdUnit('/base/test/fixtures/fakeVPAIDAd.js', callback);
             vpaid.destroy();
 
             setTimeout(function () {

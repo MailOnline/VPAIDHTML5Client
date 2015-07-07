@@ -30,8 +30,6 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
 
     this._el = utils.createElementInEl(el, 'div', this._id);
     this._frameContainer = utils.createElementInEl(this._el, 'div');
-    this._adElContainer = utils.createElementInEl(this._el, 'div');
-    this._adElContainer.className = 'adEl';
     this._videoEl = video;
     this._vpaidOptions = vpaidOptions || {timeout: 1000};
 
@@ -48,7 +46,7 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
  */
 VPAIDHTML5Client.prototype.destroy = function destroy() {
     this._destroyed = true;
-    this.unloadAdUnit();
+    $unloadPreviousAdUnit.call(this);
 };
 
 /**
@@ -68,8 +66,12 @@ VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
  */
 VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     $throwIfDestroyed.call(this);
+    $unloadPreviousAdUnit.call(this);
 
-    this._frame = utils.createIframeWithContent(
+    this._adElContainer = utils.createElementInEl(this._el, 'div');
+    this._adElContainer.className = 'adEl';
+
+    var frame = utils.createIframeWithContent(
         this._frameContainer,
         this._templateConfig.template,
         utils.extend({
@@ -77,8 +79,8 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
             iframeID: this.getID()
         }, this._templateConfig.extraOptions)
     );
+    this._frame = frame;
 
-    //TODO maybe rethink the timeout if is too hidden logic
     this._onLoad = utils.callbackTimeout(
         this._vpaidOptions.timeout,
         onLoad.bind(this),
@@ -129,16 +131,7 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
  *
  */
 VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
-    $destroyLoadListener.call(this);
-
-    $removeEl.call(this, '_frame');
-    $removeEl.call(this, '_adEl');
-
-    if (this._adUnit) {
-        this._adUnit.stopAd();
-        delete this._adUnit;
-    }
-
+    $unloadPreviousAdUnit.call(this);
 };
 
 /**
@@ -150,6 +143,7 @@ VPAIDHTML5Client.prototype.getID = function () {
     return this._id;
 };
 
+
 /**
  * $removeEl
  *
@@ -157,10 +151,17 @@ VPAIDHTML5Client.prototype.getID = function () {
  */
 function $removeEl(key) {
     var el = this[key];
-    if (el && el.parentElement) {
-        el.parentElement.remove(el);
+    if (el) {
+        el.remove();
         delete this[key];
     }
+}
+
+function $unloadPreviousAdUnit() {
+    $removeEl.call(this, '_adElContainer');
+    $removeEl.call(this, '_frame');
+    $destroyLoadListener.call(this);
+    $destroyAdUnit.call(this);
 }
 
 /**
@@ -172,6 +173,14 @@ function $destroyLoadListener() {
         window.removeEventListener('message', this._onLoad);
         utils.clearCallbackTimeout(this._onLoad);
         delete this._onLoad;
+    }
+}
+
+
+function $destroyAdUnit() {
+    if (this._adUnit) {
+        this._adUnit.stopAd();
+        delete this._adUnit;
     }
 }
 
