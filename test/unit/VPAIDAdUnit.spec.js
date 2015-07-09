@@ -77,8 +77,8 @@ describe('VPAIDAdUnit.js api', function () {
 
         it('must pass all arguments to creative subscribe', function() {
             var creative = new IVPAIDAdUnit();
-            var method = sinon.stub(creative, 'subscribe');
             var validCreative = new VPAIDAdUnit(creative);
+            var method = sinon.stub(creative, 'subscribe');
             validCreative.subscribe('someEvent', noop, this);
             clock.tick(1);
 
@@ -130,7 +130,7 @@ describe('VPAIDAdUnit.js api', function () {
                 var handler = sinon.spy();
 
                 var vpaid = new VPAIDAdUnit(creative);
-                vpaid.subscribe('error', handler);
+                vpaid.subscribe('AdError', handler);
                 vpaid[methodKey]();
                 clock.tick(100);
 

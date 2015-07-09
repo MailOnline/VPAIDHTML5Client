@@ -292,7 +292,8 @@ var Subscriber = require('./subscriber');
 var checkVPAIDInterface = IVPAIDAdUnit.checkVPAIDInterface;
 var utils = require('./utils');
 var METHODS = IVPAIDAdUnit.METHODS;
-var ERROR = 'error';
+var ERROR = 'AdError';
+var AD_CLICK = 'AdClickThru';
 
 /**
  * This callback is displayed as global member. The callback use nodejs error-first callback style
@@ -317,6 +318,7 @@ function VPAIDAdUnit(VPAIDCreative, el, video) {
         this._el = el;
         this._videoEl = video;
         this._subscribers = new Subscriber();
+        this._creative.subscribe($clickThruHook.bind(this), AD_CLICK);
     }
 }
 
@@ -400,7 +402,9 @@ VPAIDAdUnit.prototype.initAd = function initAd(width, height, viewMode, desiredB
  * @param {object} context
  */
 VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
-    $getSubscriber.call(this, event).subscribe(handler, event, context);
+    $getSubscriber.call(this, event).forEach(function (pub) {
+        pub.subscribe(handler, event, context);
+    });
 };
 
 
@@ -411,7 +415,9 @@ VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
  * @param {nodeStyleCallback} handler
  */
 VPAIDAdUnit.prototype.unsubscribe = function unsubscribe(event, handler) {
-    $getSubscriber.call(this, event).unsubscribe(handler, event);
+    $getSubscriber.call(this, event).forEach(function(pub) {
+        pub.unsubscribe(handler, event);
+    });
 };
 
 //alias
@@ -463,8 +469,22 @@ VPAIDAdUnit.prototype._destroy = function destroy() {
     this._subscribers.unsubscribeAll();
 };
 
+function $clickThruHook(url, id, playerHandles) {
+    this._subscribers.trigger(AD_CLICK, {url: url, id: id, playerHandles: playerHandles});
+}
+
 function $getSubscriber(eventName) {
-    return (eventName === ERROR) ? this._subscribers : this._creative;
+    var pub = [];
+    switch (eventName) {
+        case AD_CLICK:
+            pub.push(this._subscribers);
+            break;
+        case ERROR:
+            pub.push(this._subscribers);
+        default:
+            pub.push(this._creative);
+    }
+    return pub;
 }
 
 function callOrTriggerEvent(callback, subscribers, error, result) {
