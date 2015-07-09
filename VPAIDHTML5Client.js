@@ -288,9 +288,11 @@ function addStaticToInterface(Interface, name, value) {
 'use strict';
 
 var IVPAIDAdUnit = require('./IVPAIDAdUnit');
+var Subscriber = require('./subscriber');
 var checkVPAIDInterface = IVPAIDAdUnit.checkVPAIDInterface;
 var utils = require('./utils');
 var METHODS = IVPAIDAdUnit.METHODS;
+var ERROR = 'error';
 
 /**
  * This callback is displayed as global member. The callback use nodejs error-first callback style
@@ -314,6 +316,7 @@ function VPAIDAdUnit(VPAIDCreative, el, video) {
         this._creative = VPAIDCreative;
         this._el = el;
         this._videoEl = video;
+        this._subscribers = new Subscriber();
     }
 }
 
@@ -329,7 +332,7 @@ VPAIDAdUnit.prototype.isValidVPAIDAd = function isValidVPAIDAd() {
 };
 
 IVPAIDAdUnit.METHODS.forEach(function(method) {
-    //this methods arguments order are implemented differently from the spec
+    //NOTE: this methods arguments order are implemented differently from the spec
     var ignores = [
         'subscribe',
         'unsubscribe',
@@ -353,7 +356,7 @@ IVPAIDAdUnit.METHODS.forEach(function(method) {
                 error = e;
             }
 
-            callOrTriggerEvent(callback, error, result);
+            callOrTriggerEvent(callback, this._subscribers, error, result);
         }.bind(this), 0);
     };
 });
@@ -385,7 +388,7 @@ VPAIDAdUnit.prototype.initAd = function initAd(width, height, viewMode, desiredB
             error = e;
         }
 
-        callOrTriggerEvent(callback, error);
+        callOrTriggerEvent(callback, this._subscribers, error);
     }.bind(this), 0);
 };
 
@@ -397,7 +400,7 @@ VPAIDAdUnit.prototype.initAd = function initAd(width, height, viewMode, desiredB
  * @param {object} context
  */
 VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
-    this._creative.subscribe(handler, event, context);
+    $getSubscriber.call(this, event).subscribe(handler, event, context);
 };
 
 
@@ -408,7 +411,7 @@ VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
  * @param {nodeStyleCallback} handler
  */
 VPAIDAdUnit.prototype.unsubscribe = function unsubscribe(event, handler) {
-    this._creative.unsubscribe(handler, event);
+    $getSubscriber.call(this, event).unsubscribe(handler, event);
 };
 
 //alias
@@ -426,7 +429,7 @@ IVPAIDAdUnit.GETTERS.forEach(function(getter) {
                 error = e;
             }
 
-            callOrTriggerEvent(callback, error, result);
+            callOrTriggerEvent(callback, this._subscribers, error, result);
         }.bind(this), 0);
     };
 });
@@ -451,23 +454,31 @@ VPAIDAdUnit.prototype.setAdVolume = function setAdVolume(volume, callback) {
         if (!error) {
             error = utils.validate(result === volume, 'failed to apply volume: ' + volume);
         }
-        callOrTriggerEvent(callback, error, result);
+        callOrTriggerEvent(callback, this._subscribers, error, result);
     }.bind(this), 0);
 };
 
+VPAIDAdUnit.prototype._destroy = function destroy() {
+    this.stopAd();
+    this._subscribers.unsubscribeAll();
+};
 
-function callOrTriggerEvent(callback, error, result) {
+function $getSubscriber(eventName) {
+    return (eventName === ERROR) ? this._subscribers : this._creative;
+}
+
+function callOrTriggerEvent(callback, subscribers, error, result) {
     if (callback) {
         callback(error, result);
     } else if (error) {
-        //todo use error subscribe
+        subscribers.trigger(ERROR, error);
     }
 }
 
 module.exports = VPAIDAdUnit;
 
 
-},{"./IVPAIDAdUnit":1,"./utils":4}],3:[function(require,module,exports){
+},{"./IVPAIDAdUnit":1,"./subscriber":4,"./utils":5}],3:[function(require,module,exports){
 'use strict';
 
 
@@ -500,8 +511,6 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
 
     this._el = utils.createElementInEl(el, 'div', this._id);
     this._frameContainer = utils.createElementInEl(this._el, 'div');
-    this._adElContainer = utils.createElementInEl(this._el, 'div');
-    this._adElContainer.className = 'adEl';
     this._videoEl = video;
     this._vpaidOptions = vpaidOptions || {timeout: 1000};
 
@@ -518,7 +527,7 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
  */
 VPAIDHTML5Client.prototype.destroy = function destroy() {
     this._destroyed = true;
-    this.unloadAdUnit();
+    $unloadPreviousAdUnit.call(this);
 };
 
 /**
@@ -538,8 +547,12 @@ VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
  */
 VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     $throwIfDestroyed.call(this);
+    $unloadPreviousAdUnit.call(this);
 
-    this._frame = utils.createIframeWithContent(
+    this._adElContainer = utils.createElementInEl(this._el, 'div');
+    this._adElContainer.className = 'adEl';
+
+    var frame = utils.createIframeWithContent(
         this._frameContainer,
         this._templateConfig.template,
         utils.extend({
@@ -547,8 +560,8 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
             iframeID: this.getID()
         }, this._templateConfig.extraOptions)
     );
+    this._frame = frame;
 
-    //TODO maybe rethink the timeout if is too hidden logic
     this._onLoad = utils.callbackTimeout(
         this._vpaidOptions.timeout,
         onLoad.bind(this),
@@ -599,16 +612,7 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
  *
  */
 VPAIDHTML5Client.prototype.unloadAdUnit = function unloadAdUnit() {
-    $destroyLoadListener.call(this);
-
-    $removeEl.call(this, '_frame');
-    $removeEl.call(this, '_adEl');
-
-    if (this._adUnit) {
-        this._adUnit.stopAd();
-        delete this._adUnit;
-    }
-
+    $unloadPreviousAdUnit.call(this);
 };
 
 /**
@@ -620,17 +624,25 @@ VPAIDHTML5Client.prototype.getID = function () {
     return this._id;
 };
 
+
 /**
  * $removeEl
  *
  * @param {string} key
- * @param {HTMLElement} parent
  */
-function $removeEl(key, parent) {
-    if (this[key]) {
-        this[key].parentElement.remove(this[key]);
+function $removeEl(key) {
+    var el = this[key];
+    if (el) {
+        el.remove();
         delete this[key];
     }
+}
+
+function $unloadPreviousAdUnit() {
+    $removeEl.call(this, '_adElContainer');
+    $removeEl.call(this, '_frame');
+    $destroyLoadListener.call(this);
+    $destroyAdUnit.call(this);
 }
 
 /**
@@ -642,6 +654,14 @@ function $destroyLoadListener() {
         window.removeEventListener('message', this._onLoad);
         utils.clearCallbackTimeout(this._onLoad);
         delete this._onLoad;
+    }
+}
+
+
+function $destroyAdUnit() {
+    if (this._adUnit) {
+        this._adUnit.stopAd();
+        delete this._adUnit;
     }
 }
 
@@ -659,7 +679,46 @@ module.exports = VPAIDHTML5Client;
 window.VPAIDHTML5Client = VPAIDHTML5Client;
 
 
-},{"./VPAIDAdUnit":2,"./utils":4}],4:[function(require,module,exports){
+},{"./VPAIDAdUnit":2,"./utils":5}],4:[function(require,module,exports){
+'use strict';
+
+function Subscriber() {
+    this._subscribers = {};
+}
+
+Subscriber.prototype.subscribe = function subscribe(handler, eventName, context) {
+    this.get(eventName).push({handler: handler, context: context});
+};
+
+Subscriber.prototype.unsubscribe = function unsubscribe(handler, eventName) {
+    this._subscribers[eventName] = this.get(eventName).filter(function (subscriber) {
+        return handler === subscriber.handler;
+    });
+};
+
+Subscriber.prototype.unsubscribeAll = function unsubscribeAll() {
+    this._subscribers = {};
+};
+
+Subscriber.prototype.trigger = function(eventName, data) {
+    this.get(eventName).forEach(function (subscriber) {
+        setTimeout(function () {
+            subscriber.handler.call(subscriber.context, data);
+        }, 0);
+    });
+};
+
+Subscriber.prototype.get = function get(eventName) {
+    if (!this._subscribers[eventName]) {
+        this._subscribers[eventName] = [];
+    }
+    return this._subscribers[eventName];
+};
+
+module.exports = Subscriber;
+
+
+},{}],5:[function(require,module,exports){
 'use strict';
 
 /**
