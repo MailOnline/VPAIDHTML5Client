@@ -99,10 +99,10 @@
             });
 
 
-            adUnit.subscribe('AdClickThru', function (url, id, playerHandles) {
+            adUnit.subscribe('AdClickThru', function (clickData) {
                 console.log('---------------------------------------> AdClickThru', 'arguments:', arguments);
-                if (playerHandles) {
-                    window.open(url, '_blank');
+                if (clickData.playerHandles) {
+                    window.open(clickData.url, '_blank');
                 }
             });
 
