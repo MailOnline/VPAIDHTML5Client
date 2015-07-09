@@ -340,10 +340,11 @@ function $onVideoEnded() {
 function $onClickThru() {
     var clickThru = this._parameters.clickThru || {
         url: 'http://www.dailymail.com',
+        trackID: 123,
         playerHandles: false
     };
 
-    $trigger.call(this, 'AdClickThru', { url: clickThru.url, playerHandles: clickThru.playerHandles });
+    $trigger.call(this, 'AdClickThru', [clickThru.url, clickThru.trackID, clickThru.playerHandles]);
 
     if (!clickThru.playerHandles) {
         window.open(clickThru.url, '_blank');
@@ -365,11 +366,7 @@ function $throwError(msg) {
 function $trigger(event, msg) {
     var subscribers = this._subscribers[event] || [];
     subscribers.forEach(function(handlers) {
-        if (handlers.context) {
-            handlers.callback.call(handlers.context, msg);
-        }else {
-            handlers.callback(msg);
-        }
+        handlers.callback.apply(handlers.context, msg);
     });
 }
 
