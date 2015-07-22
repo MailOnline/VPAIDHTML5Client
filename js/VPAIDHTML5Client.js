@@ -33,7 +33,7 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
     this._el = utils.createElementInEl(el, 'div', this._id);
     this._frameContainer = utils.createElementInEl(this._el, 'div');
     this._videoEl = video;
-    this._vpaidOptions = vpaidOptions || {timeout: 1000};
+    this._vpaidOptions = vpaidOptions || {timeout: 10000};
 
     this._templateConfig = {
         template: templateConfig.template || defaultTemplate,

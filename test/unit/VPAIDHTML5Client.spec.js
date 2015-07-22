@@ -77,7 +77,7 @@ describe('VPAIDHTML5Client.js api', function()  {
             assert.isFunction(vpaid.loadAdUnit, 'must be a function');
             vpaid.loadAdUnit('', onLoad);
 
-            clock.tick(1000);
+            clock.tick(vpaid._vpaidOptions.timeout);
         });
 
         it('must remove previous callback when request another VPAIDAd', function (done){
