@@ -75,22 +75,30 @@ describe('VPAIDAdUnit.js api', function () {
             assert.deepEqual(method.getCall(1).args, [200, 200, 'normal', -1, {}, {slot: el, videoSlot: video, videoSlotCanAutoPlay: true}]);
         });
 
+        it('must subscribe to all events', function() {
+            var creative = new IVPAIDAdUnit();
+            var method = sinon.stub(creative, 'subscribe');
+            var validCreative = new VPAIDAdUnit(creative);
+
+            assert.equal(method.callCount, IVPAIDAdUnit.EVENTS.length);
+        });
+
         it('must pass all arguments to creative subscribe', function() {
             var creative = new IVPAIDAdUnit();
             var validCreative = new VPAIDAdUnit(creative);
-            var method = sinon.stub(creative, 'subscribe');
+            var method = sinon.stub(validCreative._subscribers, 'subscribe');
             validCreative.subscribe('someEvent', noop, this);
+            assert(method.called, 'must call creative subscribe');
             clock.tick(1);
 
-            assert(method.called, 'must call creative subscribe');
             assert.equal(validCreative.subscribe, validCreative.on, 'subscribe and on are the same');
             assert.deepEqual(method.getCall(0).args, [noop, 'someEvent', this], 'must change order of arguments to comply with the spec');
         });
 
         it('must pass all arguments to creative unsubscribe', function() {
             var creative = new IVPAIDAdUnit();
-            var method = sinon.stub(creative, 'unsubscribe');
             var validCreative = new VPAIDAdUnit(creative);
+            var method = sinon.stub(validCreative._subscribers, 'unsubscribe');
             validCreative.unsubscribe('someEvent', noop);
             clock.tick(1);
 

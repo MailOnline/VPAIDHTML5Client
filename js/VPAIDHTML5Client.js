@@ -47,6 +47,9 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
  *
  */
 VPAIDHTML5Client.prototype.destroy = function destroy() {
+    if (this._destroyed) {
+        return;
+    }
     this._destroyed = true;
     $unloadPreviousAdUnit.call(this);
 };

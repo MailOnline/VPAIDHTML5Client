@@ -7,6 +7,9 @@ var utils = require('./utils');
 var METHODS = IVPAIDAdUnit.METHODS;
 var ERROR = 'AdError';
 var AD_CLICK = 'AdClickThru';
+var FILTERED_EVENTS = IVPAIDAdUnit.EVENTS.filter(function (event) {
+    return event != AD_CLICK;
+});
 
 /**
  * This callback is displayed as global member. The callback use nodejs error-first callback style
@@ -31,7 +34,7 @@ function VPAIDAdUnit(VPAIDCreative, el, video) {
         this._el = el;
         this._videoEl = video;
         this._subscribers = new Subscriber();
-        this._creative.subscribe($clickThruHook.bind(this), AD_CLICK);
+        $addEventsSubscribers.call(this);
     }
 }
 
@@ -115,9 +118,7 @@ VPAIDAdUnit.prototype.initAd = function initAd(width, height, viewMode, desiredB
  * @param {object} context
  */
 VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
-    $getSubscriber.call(this, event).forEach(function (pub) {
-        pub.subscribe(handler, event, context);
-    });
+    this._subscribers.subscribe(handler, event, context);
 };
 
 
@@ -128,9 +129,7 @@ VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
  * @param {nodeStyleCallback} handler
  */
 VPAIDAdUnit.prototype.unsubscribe = function unsubscribe(event, handler) {
-    $getSubscriber.call(this, event).forEach(function(pub) {
-        pub.unsubscribe(handler, event);
-    });
+    this._subscribers.unsubscribe(handler, event);
 };
 
 //alias
@@ -182,22 +181,27 @@ VPAIDAdUnit.prototype._destroy = function destroy() {
     this._subscribers.unsubscribeAll();
 };
 
+function $addEventsSubscribers() {
+    // some ads implement
+    // so they only handle one subscriber
+    // to handle this we create our one
+    FILTERED_EVENTS.forEach(function (event) {
+        this._creative.subscribe($trigger.bind(this, event), event);
+    }.bind(this));
+
+    // map the click event to be an object instead of depending of the order of the arguments
+    // and to be consistent with the flash
+    this._creative.subscribe($clickThruHook.bind(this), AD_CLICK);
+}
+
 function $clickThruHook(url, id, playerHandles) {
     this._subscribers.trigger(AD_CLICK, {url: url, id: id, playerHandles: playerHandles});
 }
 
-function $getSubscriber(eventName) {
-    var pub = [];
-    switch (eventName) {
-        case AD_CLICK:
-            pub.push(this._subscribers);
-            break;
-        case ERROR:
-            pub.push(this._subscribers);
-        default:
-            pub.push(this._creative);
-    }
-    return pub;
+function $trigger(event) {
+    // TODO avoid leaking arguments
+    // https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#32-leaking-arguments
+    this._subscribers.trigger(event, Array.prototype.slice(arguments, 1));
 }
 
 function callOrTriggerEvent(callback, subscribers, error, result) {

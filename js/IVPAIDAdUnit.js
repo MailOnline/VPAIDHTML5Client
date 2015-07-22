@@ -259,6 +259,7 @@ IVPAIDAdUnit.prototype.setAdVolume = function(volume, callback) {};
 addStaticToInterface(IVPAIDAdUnit, 'METHODS', METHODS);
 addStaticToInterface(IVPAIDAdUnit, 'GETTERS', GETTERS);
 addStaticToInterface(IVPAIDAdUnit, 'SETTERS', SETTERS);
+addStaticToInterface(IVPAIDAdUnit, 'EVENTS',  EVENTS);
 
 
 var VPAID1_METHODS = METHODS.filter(function(method) {
