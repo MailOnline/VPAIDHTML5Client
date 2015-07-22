@@ -154,6 +154,21 @@ describe('VPAIDHTML5Client.js api', function()  {
                 done();
             }, 0);
         });
+
+        it('shouldn\'t destroy the adUnit if is already destroyed', function(done) {
+            var vpaid = new VPAIDHTML5Client(el, video, frameConfig);
+            var id = vpaid.getID();
+
+            vpaid.loadAdUnit('/base/test/fixtures/simpleVPAIDAd.js', function(err, adUnit) {
+                var spy = sinon.stub(adUnit, 'stopAd');
+                adUnit.subscribe('AdStopped', function() {
+                    vpaid.destroy();
+                    assert(!spy.called);
+                    done();
+                });
+                adUnit._creative.trigger('AdStopped');
+            });
+        });
     });
 
     it('must implement isDestroyed', function () {

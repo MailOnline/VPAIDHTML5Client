@@ -25,6 +25,8 @@ LinearAd.prototype.initAd = partial($trigger, ['AdLoaded', '']);
 
 LinearAd.prototype.startAd = partial($trigger, ['AdStarted', '']);
 
+LinearAd.prototype.trigger = $trigger;
+
 function partial(func, args) {
     return function() {
         func.apply(this, args.concat(arguments));

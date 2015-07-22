@@ -6,6 +6,8 @@ var unique = utils.unique('vpaidIframe');
 var VPAIDAdUnit = require('./VPAIDAdUnit');
 var defaultTemplate = fs.readFileSync(__dirname + '/iframe.template.html', 'utf8');
 
+var AD_STOPPED = 'AdStopped';
+
 /**
  * This callback is displayed as global member. The callback use nodejs error-first callback style
  * @callback NodeStyleCallback
@@ -110,6 +112,7 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
 
         if (!error) {
             adUnit = new VPAIDAdUnit(createAd(), this._adElContainer, this._videoEl);
+            adUnit.subscribe(AD_STOPPED, $adDestroyed.bind(this));
             error = utils.validate(adUnit.isValidVPAIDAd(), 'the add is not fully complaint with VPAID specification');
         }
 
@@ -157,11 +160,20 @@ function $removeEl(key) {
     }
 }
 
+function $adDestroyed() {
+    $removeAdElements.call(this);
+    delete this._adUnit;
+}
+
 function $unloadPreviousAdUnit() {
+    $removeAdElements.call(this);
+    $destroyAdUnit.call(this);
+}
+
+function $removeAdElements() {
     $removeEl.call(this, '_adElContainer');
     $removeEl.call(this, '_frame');
     $destroyLoadListener.call(this);
-    $destroyAdUnit.call(this);
 }
 
 /**
