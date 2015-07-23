@@ -28,6 +28,7 @@ The project uses:
 TODO
 ----
   - test how will work with a real ad in the demo and test
+  - try to use the slot element inside the iframe to see if the ad's will not mess the css of the page
   - validate better if the postmessage and iframe works across browsers
 
 
