@@ -114,7 +114,7 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
         }
 
         if (!error) {
-            adUnit = new VPAIDAdUnit(createAd(), this._adElContainer, this._videoEl);
+            adUnit = new VPAIDAdUnit(createAd(), this._frame.contentWindow.document.querySelector('.ad-element'), this._videoEl, this._frame);
             adUnit.subscribe(AD_STOPPED, $adDestroyed.bind(this));
             error = utils.validate(adUnit.isValidVPAIDAd(), 'the add is not fully complaint with VPAID specification');
         }

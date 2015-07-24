@@ -27,12 +27,13 @@ var FILTERED_EVENTS = IVPAIDAdUnit.EVENTS.filter(function (event) {
  * @param {HTMLElement} [el] this will be used in initAd environmentVars.slot if defined
  * @param {HTMLVideoElement} [video] this will be used in initAd environmentVars.videoSlot if defined
  */
-function VPAIDAdUnit(VPAIDCreative, el, video) {
+function VPAIDAdUnit(VPAIDCreative, el, video, iframe) {
     this._isValid = checkVPAIDInterface(VPAIDCreative);
     if (this._isValid) {
         this._creative = VPAIDCreative;
         this._el = el;
         this._videoEl = video;
+        this._iframe = iframe;
         this._subscribers = new Subscriber();
         $addEventsSubscribers.call(this);
     }

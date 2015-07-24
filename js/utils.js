@@ -95,8 +95,11 @@ function createIframeWithContent(parent, template, data) {
 function createIframe(parent, url) {
     var nEl = document.createElement('iframe');
     nEl.src = url || 'about:blank';
-    nEl.width = 0;
-    nEl.height = 0;
+    nEl.width = '100%';
+    nEl.height = '100%';
+    nEl.style.position = 'absolute';
+    nEl.style.left = '0';
+    nEl.style.top = '0';
     parent.innerHTML = '';
     parent.appendChild(nEl);
     return nEl;
