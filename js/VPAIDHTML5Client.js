@@ -30,8 +30,7 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
     this._id = unique();
     this._destroyed = false;
 
-    this._el = utils.createElementInEl(el, 'div', this._id);
-    this._frameContainer = utils.createElementInEl(this._el, 'div');
+    this._frameContainer = utils.createElementInEl(el, 'div');
     this._videoEl = video;
     this._vpaidOptions = vpaidOptions || {timeout: 10000};
 
@@ -73,9 +72,6 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     $throwIfDestroyed.call(this);
     $unloadPreviousAdUnit.call(this);
 
-    this._adElContainer = utils.createElementInEl(this._el, 'div');
-    this._adElContainer.className = 'adEl';
-
     var frame = utils.createIframeWithContent(
         this._frameContainer,
         this._templateConfig.template,
@@ -114,7 +110,8 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
         }
 
         if (!error) {
-            adUnit = new VPAIDAdUnit(createAd(), this._frame.contentWindow.document.querySelector('.ad-element'), this._videoEl, this._frame);
+            var adEl = this._frame.contentWindow.document.querySelector('.ad-element');
+            adUnit = new VPAIDAdUnit(createAd(), adEl, this._videoEl, this._frame);
             adUnit.subscribe(AD_STOPPED, $adDestroyed.bind(this));
             error = utils.validate(adUnit.isValidVPAIDAd(), 'the add is not fully complaint with VPAID specification');
         }
@@ -174,7 +171,6 @@ function $unloadPreviousAdUnit() {
 }
 
 function $removeAdElements() {
-    $removeEl.call(this, '_adElContainer');
     $removeEl.call(this, '_frame');
     $destroyLoadListener.call(this);
 }
