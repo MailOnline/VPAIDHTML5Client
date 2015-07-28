@@ -2,6 +2,10 @@
   "name": "vpaid-html5-client",
   "version": "0.1.5",
   "description": "VPAID HTML5",
+  "main": [
+    "bin/VPAIDHTML5Client.js",
+    "bin/VPAIDHTML5Client.js.map"
+  ],
   "scripts": {
     "start": "gulp serve",
     "test": "gulp test:ci"
@@ -14,6 +18,13 @@
     "Luis Silva <luis.dasilva@mailonline.co.uk>"
   ],
   "license": "MIT",
+  "keywords": [
+    "VPAID",
+    "HTML5",
+    "JS",
+    "VIDEO",
+    "IAB"
+  ],
   "bugs": {
     "url": "https://github.com/MailOnline/VPAIDHTML5Client/issues"
   },
