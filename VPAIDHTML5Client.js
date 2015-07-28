@@ -260,6 +260,7 @@ IVPAIDAdUnit.prototype.setAdVolume = function(volume, callback) {};
 addStaticToInterface(IVPAIDAdUnit, 'METHODS', METHODS);
 addStaticToInterface(IVPAIDAdUnit, 'GETTERS', GETTERS);
 addStaticToInterface(IVPAIDAdUnit, 'SETTERS', SETTERS);
+addStaticToInterface(IVPAIDAdUnit, 'EVENTS',  EVENTS);
 
 
 var VPAID1_METHODS = METHODS.filter(function(method) {
@@ -294,6 +295,9 @@ var utils = require('./utils');
 var METHODS = IVPAIDAdUnit.METHODS;
 var ERROR = 'AdError';
 var AD_CLICK = 'AdClickThru';
+var FILTERED_EVENTS = IVPAIDAdUnit.EVENTS.filter(function (event) {
+    return event != AD_CLICK;
+});
 
 /**
  * This callback is displayed as global member. The callback use nodejs error-first callback style
@@ -311,14 +315,15 @@ var AD_CLICK = 'AdClickThru';
  * @param {HTMLElement} [el] this will be used in initAd environmentVars.slot if defined
  * @param {HTMLVideoElement} [video] this will be used in initAd environmentVars.videoSlot if defined
  */
-function VPAIDAdUnit(VPAIDCreative, el, video) {
+function VPAIDAdUnit(VPAIDCreative, el, video, iframe) {
     this._isValid = checkVPAIDInterface(VPAIDCreative);
     if (this._isValid) {
         this._creative = VPAIDCreative;
         this._el = el;
         this._videoEl = video;
+        this._iframe = iframe;
         this._subscribers = new Subscriber();
-        this._creative.subscribe($clickThruHook.bind(this), AD_CLICK);
+        $addEventsSubscribers.call(this);
     }
 }
 
@@ -402,9 +407,7 @@ VPAIDAdUnit.prototype.initAd = function initAd(width, height, viewMode, desiredB
  * @param {object} context
  */
 VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
-    $getSubscriber.call(this, event).forEach(function (pub) {
-        pub.subscribe(handler, event, context);
-    });
+    this._subscribers.subscribe(handler, event, context);
 };
 
 
@@ -415,9 +418,7 @@ VPAIDAdUnit.prototype.subscribe = function subscribe(event, handler, context) {
  * @param {nodeStyleCallback} handler
  */
 VPAIDAdUnit.prototype.unsubscribe = function unsubscribe(event, handler) {
-    $getSubscriber.call(this, event).forEach(function(pub) {
-        pub.unsubscribe(handler, event);
-    });
+    this._subscribers.unsubscribe(handler, event);
 };
 
 //alias
@@ -469,22 +470,27 @@ VPAIDAdUnit.prototype._destroy = function destroy() {
     this._subscribers.unsubscribeAll();
 };
 
+function $addEventsSubscribers() {
+    // some ads implement
+    // so they only handle one subscriber
+    // to handle this we create our one
+    FILTERED_EVENTS.forEach(function (event) {
+        this._creative.subscribe($trigger.bind(this, event), event);
+    }.bind(this));
+
+    // map the click event to be an object instead of depending of the order of the arguments
+    // and to be consistent with the flash
+    this._creative.subscribe($clickThruHook.bind(this), AD_CLICK);
+}
+
 function $clickThruHook(url, id, playerHandles) {
     this._subscribers.trigger(AD_CLICK, {url: url, id: id, playerHandles: playerHandles});
 }
 
-function $getSubscriber(eventName) {
-    var pub = [];
-    switch (eventName) {
-        case AD_CLICK:
-            pub.push(this._subscribers);
-            break;
-        case ERROR:
-            pub.push(this._subscribers);
-        default:
-            pub.push(this._creative);
-    }
-    return pub;
+function $trigger(event) {
+    // TODO avoid leaking arguments
+    // https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#32-leaking-arguments
+    this._subscribers.trigger(event, Array.prototype.slice(arguments, 1));
 }
 
 function callOrTriggerEvent(callback, subscribers, error, result) {
@@ -505,7 +511,9 @@ module.exports = VPAIDAdUnit;
 var utils = require('./utils');
 var unique = utils.unique('vpaidIframe');
 var VPAIDAdUnit = require('./VPAIDAdUnit');
-var defaultTemplate = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body>\n    <script type=\"text/javascript\" src=\"{{iframeURL_JS}}\"></script>\n    <script>\n        parent.postMessage('{\"event\": \"ready\", \"id\": \"{{iframeID}}\"}', window.location.origin);\n    </script>\n</body>\n</html>\n";
+var defaultTemplate = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body>\n    <script type=\"text/javascript\" src=\"{{iframeURL_JS}}\"></script>\n    <script>\n        parent.postMessage('{\"event\": \"ready\", \"id\": \"{{iframeID}}\"}', window.location.origin);\n    </script>\n    <div class=\"ad-element\">\n    </div>\n</body>\n</html>\n";
+
+var AD_STOPPED = 'AdStopped';
 
 /**
  * This callback is displayed as global member. The callback use nodejs error-first callback style
@@ -529,10 +537,9 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
     this._id = unique();
     this._destroyed = false;
 
-    this._el = utils.createElementInEl(el, 'div', this._id);
-    this._frameContainer = utils.createElementInEl(this._el, 'div');
+    this._frameContainer = utils.createElementInEl(el, 'div');
     this._videoEl = video;
-    this._vpaidOptions = vpaidOptions || {timeout: 1000};
+    this._vpaidOptions = vpaidOptions || {timeout: 10000};
 
     this._templateConfig = {
         template: templateConfig.template || defaultTemplate,
@@ -546,6 +553,9 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
  *
  */
 VPAIDHTML5Client.prototype.destroy = function destroy() {
+    if (this._destroyed) {
+        return;
+    }
     this._destroyed = true;
     $unloadPreviousAdUnit.call(this);
 };
@@ -568,9 +578,6 @@ VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
 VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     $throwIfDestroyed.call(this);
     $unloadPreviousAdUnit.call(this);
-
-    this._adElContainer = utils.createElementInEl(this._el, 'div');
-    this._adElContainer.className = 'adEl';
 
     var frame = utils.createIframeWithContent(
         this._frameContainer,
@@ -610,7 +617,9 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
         }
 
         if (!error) {
-            adUnit = new VPAIDAdUnit(createAd(), this._adElContainer, this._videoEl);
+            var adEl = this._frame.contentWindow.document.querySelector('.ad-element');
+            adUnit = new VPAIDAdUnit(createAd(), adEl, this._videoEl, this._frame);
+            adUnit.subscribe(AD_STOPPED, $adDestroyed.bind(this));
             error = utils.validate(adUnit.isValidVPAIDAd(), 'the add is not fully complaint with VPAID specification');
         }
 
@@ -658,11 +667,19 @@ function $removeEl(key) {
     }
 }
 
+function $adDestroyed() {
+    $removeAdElements.call(this);
+    delete this._adUnit;
+}
+
 function $unloadPreviousAdUnit() {
-    $removeEl.call(this, '_adElContainer');
+    $removeAdElements.call(this);
+    $destroyAdUnit.call(this);
+}
+
+function $removeAdElements() {
     $removeEl.call(this, '_frame');
     $destroyLoadListener.call(this);
-    $destroyAdUnit.call(this);
 }
 
 /**
@@ -836,8 +853,11 @@ function createIframeWithContent(parent, template, data) {
 function createIframe(parent, url) {
     var nEl = document.createElement('iframe');
     nEl.src = url || 'about:blank';
-    nEl.width = 0;
-    nEl.height = 0;
+    nEl.width = '100%';
+    nEl.height = '100%';
+    nEl.style.position = 'absolute';
+    nEl.style.left = '0';
+    nEl.style.top = '0';
     parent.innerHTML = '';
     parent.appendChild(nEl);
     return nEl;
