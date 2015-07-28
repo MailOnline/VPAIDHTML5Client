@@ -1,6 +1,6 @@
 {
   "name": "vpaid-html5-client",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "VPAID HTML5",
   "scripts": {
     "start": "gulp serve",
