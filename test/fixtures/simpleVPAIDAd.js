@@ -26,6 +26,7 @@ LinearAd.prototype.initAd = partial($trigger, ['AdLoaded', '']);
 LinearAd.prototype.startAd = partial($trigger, ['AdStarted', '']);
 
 LinearAd.prototype.trigger = $trigger;
+LinearAd.prototype.triggerSync = $triggerSync;
 
 function partial(func, args) {
     return function() {
@@ -34,19 +35,20 @@ function partial(func, args) {
 }
 
 function $trigger(event, msg) {
+    setTimeout($triggerSync.bind(this, event, msg), 0);
+}
+
+function $triggerSync(event) {
     var subscribers = this._subscribers[event] || [];
-    setTimeout(function() {
-        subscribers.forEach(function(handlers) {
-            if (handlers.context) {
-                handlers.callback.call(handlers.context, msg);
-            }else {
-                handlers.callback(msg);
-            }
-        });
-    }, 0);
+    var args = Array.prototype.slice.call(arguments, 1);
+    subscribers.forEach(function(handlers) {
+        handlers.callback.apply(handlers.context, args);
+    });
 }
 
 window.getVPAIDAd = function() {
     return new LinearAd();
 };
+
+module.exports = LinearAd;
 

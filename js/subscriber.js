@@ -26,6 +26,12 @@ Subscriber.prototype.trigger = function(eventName, data) {
     });
 };
 
+Subscriber.prototype.triggerSync = function(eventName, data) {
+    this.get(eventName).forEach(function (subscriber) {
+        subscriber.handler.call(subscriber.context, data);
+    });
+};
+
 Subscriber.prototype.get = function get(eventName) {
     if (!this._subscribers[eventName]) {
         this._subscribers[eventName] = [];

@@ -2,6 +2,7 @@ var noop = require('../testHelper').noop;
 var implementsProperties = require('../testHelper').implementsProperties;
 var VPAIDAdUnit = require('../../js/VPAIDAdUnit');
 var IVPAIDAdUnit = require('../../js/IVPAIDAdUnit');
+var SimpleVPAIDAdUnit = require('../fixtures/simpleVPAIDAd');
 
 
 describe('VPAIDAdUnit.js api', function () {
@@ -81,6 +82,18 @@ describe('VPAIDAdUnit.js api', function () {
             var validCreative = new VPAIDAdUnit(creative);
 
             assert.equal(method.callCount, IVPAIDAdUnit.EVENTS.length);
+        });
+
+        it('must trigger immediately the clicktru without delay', function () {
+            var arg = {url: 'example', playerHandles: true, id: '123'};
+            var creative = new SimpleVPAIDAdUnit();
+            var validCreative = new VPAIDAdUnit(creative);
+            var spy = sinon.spy();
+            validCreative.subscribe('AdClickThru', spy);
+            creative.triggerSync('AdClickThru', arg.url, arg.id, arg.playerHandles);
+
+            assert(spy.called);
+            assert(spy.calledWith(arg));
         });
 
         it('must pass all arguments to creative subscribe', function() {

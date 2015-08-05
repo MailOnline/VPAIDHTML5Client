@@ -196,7 +196,7 @@ function $addEventsSubscribers() {
 }
 
 function $clickThruHook(url, id, playerHandles) {
-    this._subscribers.trigger(AD_CLICK, {url: url, id: id, playerHandles: playerHandles});
+    this._subscribers.triggerSync(AD_CLICK, {url: url, id: id, playerHandles: playerHandles});
 }
 
 function $trigger(event) {

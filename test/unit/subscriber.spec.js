@@ -151,5 +151,38 @@ describe('subscriber.js api', function () {
             });
         });
 
+        describe('triggerSync', function () {
+
+            it('must implement', function () {
+                assert.isFunction(subscriber.trigger);
+            });
+
+            it('must trigger the event listeners immediately', function (){
+                var cb1 = [sinon.spy(), sinon.spy()];
+                var cb2 = [sinon.spy()];
+
+                cb1.forEach(function (cb) {
+                    subscriber.subscribe(cb, 'event1');
+                });
+
+                cb2.forEach(function (cb) {
+                    subscriber.subscribe(cb, 'event2');
+                });
+
+                var data1 = {};
+                var data2 = {};
+                subscriber.triggerSync('event1', data1);
+                subscriber.triggerSync('event2', data2);
+
+                cb1.forEach(function (cb) {
+                    assert(cb.calledWith(data1));
+                });
+
+                cb2.forEach(function (cb) {
+                    assert(cb.calledWith(data2));
+                });
+            });
+        });
+
     });
 });
