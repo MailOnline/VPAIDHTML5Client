@@ -130,7 +130,7 @@ IVPAIDAdUnit.prototype.skipAd = function(callback) {};
  *
  * @param {nodeStyleCallback} callback
  */
-IVPAIDAdUnit.prototype.resizeAd = function(callback) {};
+IVPAIDAdUnit.prototype.resizeAd = function(width, height, viewMode, callback) {};
 
 /**
  * pauseAd

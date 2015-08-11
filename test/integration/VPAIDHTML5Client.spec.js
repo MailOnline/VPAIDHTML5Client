@@ -105,6 +105,18 @@ describe('integration test', function () {
                 });
             });
 
+            it.only('must call callback after resizeAd is called', function(done) {
+                var callback = sinon.spy(function() {
+                    done();
+                });
+                vpaid = createAndLoad(function(adUnit) {
+                    adUnit.subscribe('AdStarted', function(msg) {
+                        adUnit.resizeAd(300, 200, 'normal', callback)
+                    });
+                    adUnit.startAd();
+                });
+            });
+
         })
     });
 
