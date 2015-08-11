@@ -6,7 +6,6 @@ function LinearAd() {
 
 IVPAIDAdUnit.METHODS.forEach(function (key) {
     LinearAd.prototype[key] = function () {
-        console.log('method called:', key);
     }
 });
 

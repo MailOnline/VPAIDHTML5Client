@@ -105,7 +105,7 @@ describe('integration test', function () {
                 });
             });
 
-            it.only('must call callback after resizeAd is called', function(done) {
+            it('must call callback after resizeAd is called', function(done) {
                 var callback = sinon.spy(function() {
                     done();
                 });

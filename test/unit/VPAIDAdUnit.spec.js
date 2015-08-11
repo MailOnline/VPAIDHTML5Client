@@ -125,7 +125,8 @@ describe('VPAIDAdUnit.js api', function () {
                 'subscribe',
                 'unsubscribe',
                 'initAd',
-                'handshakeVersion'
+                'handshakeVersion',
+                'resizeAd'
             ];
 
             if (methodsToIgnore.indexOf(methodKey) !== -1) return;
