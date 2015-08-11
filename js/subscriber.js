@@ -19,9 +19,12 @@ Subscriber.prototype.unsubscribeAll = function unsubscribeAll() {
 };
 
 Subscriber.prototype.trigger = function(eventName, data) {
-    this.get(eventName).forEach(function (subscriber) {
+    var that = this;
+    that.get(eventName).forEach(function (subscriber) {
         setTimeout(function () {
-            subscriber.handler.call(subscriber.context, data);
+            if (that.get(eventName)) {
+                subscriber.handler.call(subscriber.context, data);
+            }
         }, 0);
     });
 };
