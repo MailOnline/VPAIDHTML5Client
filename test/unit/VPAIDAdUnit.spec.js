@@ -30,13 +30,16 @@ describe('VPAIDAdUnit.js api', function () {
 
     describe('method', function () {
 
-        var clock;
+        var clock, iframe;
         beforeEach(function () {
             clock = sinon.useFakeTimers();
+            iframe = document.createElement('iframe');
+            document.body.appendChild(iframe);
         });
 
         afterEach(function() {
             clock.restore();
+            document.body.removeChild(iframe);
         });
 
         it('handshakeVersion must pass all arguments to creative', function() {
@@ -62,18 +65,35 @@ describe('VPAIDAdUnit.js api', function () {
         it('must pass all arguments to creative initAd', function() {
             var el = document.createElement('div');
             var video = document.createElement('video');
+            iframe.contentDocument.body.appendChild(el);
 
             var creative = new IVPAIDAdUnit();
             var method = sinon.stub(creative, 'initAd');
             var callback = sinon.spy();
 
-            new VPAIDAdUnit(creative, el, video).initAd(200, 200, 'normal', -1, {}, {videoSlotCanAutoPlay: true}, callback);
+            new VPAIDAdUnit(creative, el, video, iframe).initAd(200, 200, 'normal', -1, {}, {videoSlotCanAutoPlay: true}, callback);
             new VPAIDAdUnit(creative).initAd(200, 200, 'normal', -1, {}, {slot: el, videoSlot: video, videoSlotCanAutoPlay: true}, callback);
             clock.tick(1);
 
             assert(method.called, 'must call creative initAd');
             assert.deepEqual(method.getCall(0).args, [200, 200, 'normal', -1, {}, {slot: el, videoSlot: video, videoSlotCanAutoPlay: true}]);
             assert.deepEqual(method.getCall(1).args, [200, 200, 'normal', -1, {}, {slot: el, videoSlot: video, videoSlotCanAutoPlay: true}]);
+        });
+
+        it('must add event listerner to iframe html element', function() {
+            var el = document.createElement('div');
+            var video = document.createElement('video');
+            iframe.contentDocument.body.appendChild(el);
+
+            var creative = new IVPAIDAdUnit();
+            var callback = sinon.spy();
+
+            new VPAIDAdUnit(creative, el, video, iframe).initAd(200, 200, 'normal', -1, {}, {videoSlotCanAutoPlay: true}, noop);
+
+            video.addEventListener('click', callback);
+            iframe.contentDocument.documentElement.click();
+
+            assert(callback.called, 'must trigger click in videoEl synchronous');
         });
 
         it('must subscribe to all events', function() {
@@ -160,7 +180,6 @@ describe('VPAIDAdUnit.js api', function () {
             });
 
         });
-
     });
 
     describe('getters', function () {
