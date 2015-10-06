@@ -105,7 +105,8 @@ function createIframe(parent, url) {
     nEl.style.top = '0';
     nEl.style.margin = '0px';
     nEl.style.padding = '0px';
-    nEl.style.border = '0px none';
+    nEl.style.border = 'none';
+    nEl.setAttribute('SCROLLING','NO');
     parent.innerHTML = '';
     parent.appendChild(nEl);
     return nEl;
