@@ -95,11 +95,16 @@ function createIframeWithContent(parent, template, data) {
 function createIframe(parent, url) {
     var nEl = document.createElement('iframe');
     nEl.src = url || 'about:blank';
+    nEl.marginWidth = '0';
+    nEl.marginHeight = '0';
+    nEl.frameBorder = '0';
     nEl.width = '100%';
     nEl.height = '100%';
     nEl.style.position = 'absolute';
     nEl.style.left = '0';
     nEl.style.top = '0';
+    nEl.style.margin = '0px';
+    nEl.style.padding = '0px';
     nEl.style.border = 'none';
     nEl.setAttribute('SCROLLING','NO');
     parent.innerHTML = '';
