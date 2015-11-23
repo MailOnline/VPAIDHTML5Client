@@ -10,6 +10,9 @@
     "start": "gulp serve",
     "test": "gulp test:ci"
   },
+  "browserify": {
+    "transform": ["brfs"]
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/MailOnline/VPAIDHTML5Client.git"
