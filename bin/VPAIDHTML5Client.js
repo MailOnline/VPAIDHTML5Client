@@ -519,11 +519,14 @@ module.exports = VPAIDAdUnit;
 },{"./IVPAIDAdUnit":1,"./subscriber":4,"./utils":5}],3:[function(require,module,exports){
 'use strict';
 
-
 var utils = require('./utils');
 var unique = utils.unique('vpaidIframe');
 var VPAIDAdUnit = require('./VPAIDAdUnit');
-var defaultTemplate = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <style>\n    \tbody {\n    \t\tmargin: 0;\n    \t\tpadding: 0;\n    \t}\n    </style>\n</head>\n<body>\n    <script type=\"text/javascript\" src=\"{{iframeURL_JS}}\"></script>\n    <script>\n        parent.postMessage('{\"event\": \"ready\", \"id\": \"{{iframeID}}\"}', window.location.origin);\n    </script>\n    <div class=\"ad-element\">\n    </div>\n</body>\n</html>\n";
+
+var defaultTemplate = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body style="margin:0;padding:0">';
+defaultTemplate += '<script type="text/javascript" src="{{iframeURL_JS}}"></script><script>';
+defaultTemplate += 'parent.postMessage(\'{"event": "ready", "id": "{{iframeID}}"}\', window.location.origin);';
+defaultTemplate += '</script><div class="ad-element"></div></body></html>';
 
 var AD_STOPPED = 'AdStopped';
 
@@ -874,11 +877,16 @@ function createIframeWithContent(parent, template, data) {
 function createIframe(parent, url) {
     var nEl = document.createElement('iframe');
     nEl.src = url || 'about:blank';
+    nEl.marginWidth = '0';
+    nEl.marginHeight = '0';
+    nEl.frameBorder = '0';
     nEl.width = '100%';
     nEl.height = '100%';
     nEl.style.position = 'absolute';
     nEl.style.left = '0';
     nEl.style.top = '0';
+    nEl.style.margin = '0px';
+    nEl.style.padding = '0px';
     nEl.style.border = 'none';
     nEl.setAttribute('SCROLLING','NO');
     parent.innerHTML = '';
