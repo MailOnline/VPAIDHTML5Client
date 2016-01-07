@@ -736,12 +736,14 @@ function Subscriber() {
 }
 
 Subscriber.prototype.subscribe = function subscribe(handler, eventName, context) {
-    this.get(eventName).push({handler: handler, context: context});
+    if (!this.isHandlerAttached(handler, eventName)) {
+        this.get(eventName).push({handler: handler, context: context, eventName: eventName});
+    }
 };
 
 Subscriber.prototype.unsubscribe = function unsubscribe(handler, eventName) {
     this._subscribers[eventName] = this.get(eventName).filter(function (subscriber) {
-        return handler === subscriber.handler;
+        return handler !== subscriber.handler;
     });
 };
 
@@ -751,9 +753,12 @@ Subscriber.prototype.unsubscribeAll = function unsubscribeAll() {
 
 Subscriber.prototype.trigger = function(eventName, data) {
     var that = this;
-    that.get(eventName).forEach(function (subscriber) {
+    var subscribers = this.get(eventName)
+        .concat(this.get('*'));
+
+    subscribers.forEach(function (subscriber) {
         setTimeout(function () {
-            if (that.get(eventName)) {
+            if (that.isHandlerAttached(subscriber.handler, subscriber.eventName)) {
                 subscriber.handler.call(subscriber.context, data);
             }
         }, 0);
@@ -761,7 +766,10 @@ Subscriber.prototype.trigger = function(eventName, data) {
 };
 
 Subscriber.prototype.triggerSync = function(eventName, data) {
-    this.get(eventName).forEach(function (subscriber) {
+    var subscribers = this.get(eventName)
+        .concat(this.get('*'));
+
+    subscribers.forEach(function (subscriber) {
         subscriber.handler.call(subscriber.context, data);
     });
 };
@@ -771,6 +779,12 @@ Subscriber.prototype.get = function get(eventName) {
         this._subscribers[eventName] = [];
     }
     return this._subscribers[eventName];
+};
+
+Subscriber.prototype.isHandlerAttached = function isHandlerAttached(handler, eventName) {
+    return this.get(eventName).some(function(subscriber) {
+        return handler === subscriber.handler;
+    })
 };
 
 module.exports = Subscriber;
@@ -874,11 +888,16 @@ function createIframeWithContent(parent, template, data) {
 function createIframe(parent, url) {
     var nEl = document.createElement('iframe');
     nEl.src = url || 'about:blank';
+    nEl.marginWidth = '0';
+    nEl.marginHeight = '0';
+    nEl.frameBorder = '0';
     nEl.width = '100%';
     nEl.height = '100%';
     nEl.style.position = 'absolute';
     nEl.style.left = '0';
     nEl.style.top = '0';
+    nEl.style.margin = '0px';
+    nEl.style.padding = '0px';
     nEl.style.border = 'none';
     nEl.setAttribute('SCROLLING','NO');
     parent.innerHTML = '';
