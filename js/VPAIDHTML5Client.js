@@ -1,10 +1,13 @@
 'use strict';
 
-var fs = require('fs');
 var utils = require('./utils');
 var unique = utils.unique('vpaidIframe');
 var VPAIDAdUnit = require('./VPAIDAdUnit');
-var defaultTemplate = fs.readFileSync(__dirname + '/iframe.template.html', 'utf8');
+
+var defaultTemplate = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body style="margin:0;padding:0">';
+defaultTemplate += '<script type="text/javascript" src="{{iframeURL_JS}}"></script><script>';
+defaultTemplate += 'parent.postMessage(\'{"event": "ready", "id": "{{iframeID}}"}\', window.location.origin);';
+defaultTemplate += '</script><div class="ad-element"></div></body></html>';
 
 var AD_STOPPED = 'AdStopped';
 

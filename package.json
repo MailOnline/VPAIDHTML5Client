@@ -2,16 +2,10 @@
   "name": "vpaid-html5-client",
   "version": "0.1.11",
   "description": "VPAID HTML5",
-  "main": [
-    "bin/VPAIDHTML5Client.js",
-    "bin/VPAIDHTML5Client.js.map"
-  ],
+  "main": "src/VPAIDHTML5Client.js",
   "scripts": {
     "start": "gulp serve",
     "test": "gulp test:ci"
-  },
-  "browserify": {
-    "transform": ["brfs"]
   },
   "repository": {
     "type": "git",
