@@ -523,10 +523,16 @@ var utils = require('./utils');
 var unique = utils.unique('vpaidIframe');
 var VPAIDAdUnit = require('./VPAIDAdUnit');
 
-var defaultTemplate = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body style="margin:0;padding:0">';
-defaultTemplate += '<script type="text/javascript" src="{{iframeURL_JS}}"></script><script>';
-defaultTemplate += 'parent.postMessage(\'{"event": "ready", "id": "{{iframeID}}"}\', window.location.origin);';
-defaultTemplate += '</script><div class="ad-element"></div></body></html>';
+var defaultTemplate = '<!DOCTYPE html>' +
+    '<html lang="en">' +
+    '<head><meta charset="UTF-8"></head>' +
+    '<body style="margin:0;padding:0"><div class="ad-element"></div>' +
+    '<script type="text/javascript" src="{{iframeURL_JS}}"></script>' +
+    '<script type="text/javascript">' +
+    'window.parent.postMessage(\'{"event": "ready", "id": "{{iframeID}}"}\', \'{{origin}}\');' +
+    '</script>' +
+    '</body>' +
+    '</html>';
 
 var AD_STOPPED = 'AdStopped';
 
@@ -560,7 +566,6 @@ function VPAIDHTML5Client(el, video, templateConfig, vpaidOptions) {
         template: templateConfig.template || defaultTemplate,
         extraOptions: templateConfig.extraOptions || {}
     };
-
 }
 
 /**
@@ -593,15 +598,18 @@ VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
 VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     $throwIfDestroyed.call(this);
     $unloadPreviousAdUnit.call(this);
+    var that = this;
 
     var frame = utils.createIframeWithContent(
         this._frameContainer,
         this._templateConfig.template,
         utils.extend({
             iframeURL_JS: adURL,
-            iframeID: this.getID()
+            iframeID: this.getID(),
+            origin: getOrigin()
         }, this._templateConfig.extraOptions)
     );
+
     this._frame = frame;
 
     this._onLoad = utils.callbackTimeout(
@@ -615,31 +623,31 @@ VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
     function onLoad (e) {
         /*jshint validthis: false */
         //don't clear timeout
-        if (e.origin !== window.location.origin) return;
+        if (e.origin !== getOrigin()) return;
         var result = JSON.parse(e.data);
 
         //don't clear timeout
-        if (result.id !== this.getID()) return;
+        if (result.id !== that.getID()) return;
 
         var adUnit, error, createAd;
-        if (!this._frame.contentWindow) {
+        if (!that._frame.contentWindow) {
 
             error = 'the iframe is not anymore in the DOM tree';
 
         } else {
-            createAd = this._frame.contentWindow.getVPAIDAd;
+            createAd = that._frame.contentWindow.getVPAIDAd;
             error = utils.validate(typeof createAd === 'function', 'the ad didn\'t return a function to create an ad');
         }
 
         if (!error) {
-            var adEl = this._frame.contentWindow.document.querySelector('.ad-element');
-            adUnit = new VPAIDAdUnit(createAd(), adEl, this._videoEl, this._frame);
-            adUnit.subscribe(AD_STOPPED, $adDestroyed.bind(this));
+            var adEl = that._frame.contentWindow.document.querySelector('.ad-element');
+            adUnit = new VPAIDAdUnit(createAd(), adEl, that._videoEl, that._frame);
+            adUnit.subscribe(AD_STOPPED, $adDestroyed.bind(that));
             error = utils.validate(adUnit.isValidVPAIDAd(), 'the add is not fully complaint with VPAID specification');
         }
 
-        this._adUnit = adUnit;
-        $destroyLoadListener.call(this);
+        that._adUnit = adUnit;
+        $destroyLoadListener.call(that);
         callback(error, error ? null : adUnit);
 
         //clear timeout
@@ -724,6 +732,17 @@ function $destroyAdUnit() {
 function $throwIfDestroyed() {
     if (this._destroyed) {
         throw new Error ('VPAIDHTML5Client already destroyed!');
+    }
+}
+
+function getOrigin() {
+    if( window.location.origin ) {
+        return window.location.origin;
+    }
+    else {
+        return window.location.protocol + "//" +
+            window.location.hostname +
+            (window.location.port ? ':' + window.location.port: '');
     }
 }
 
