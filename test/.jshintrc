@@ -1,5 +1,7 @@
 {
+	"browser": true,
     "mocha": true,
+    "node": true,
     "predef": [ "assert", "sinon" ]
 }
 

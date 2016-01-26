@@ -5,7 +5,7 @@ var noop = require('../testHelper').noop;
 var getBrowserifyPath = require('../testHelper').getBrowserifyPath;
 var framePostMessage = require('../testHelper').framePostMessage;
 var VPAIDHTML5Client = require('../../js/VPAIDHTML5Client');
-var template = fs.readFileSync(__dirname + '/../fixtures/iframe.template.html', 'utf8');
+var template = require('../testHelper').iframeTemplate;
 
 describe('VPAIDHTML5Client.js api', function()  {
     var el, video;

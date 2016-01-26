@@ -17,7 +17,7 @@ var buffer = require('vinyl-buffer');
 var assign = require('lodash').assign;
 
 //test
-var karma = require('karma').server;
+var KarmaServer = require('karma').Server;
 var istanbul = require('browserify-istanbul');
 
 //paths
@@ -42,7 +42,6 @@ var jsBuilds = [
     );
     var taskName = 'bundle:' + index;
 
-    build.transform('brfs'); // parse readFileSync and inline the content of that file, useful for templates
     build.on('log', gutil.log); // output build logs to terminal
     gulp.task(taskName, task);
 
@@ -72,13 +71,13 @@ gulp.task('browserify', jsBuilds.map(function (build) {
 }));
 
 gulp.task('test:ci', function (done) {
-    karma.start({
+    new KarmaServer({
         configFile: __dirname + '/karma.conf.js',
         reporters: ['spec', 'coverage'],
         browsers: ['Firefox'],
         browserify: {
             debug: true,
-            transform: ['brfs', istanbul()]
+            transform: [istanbul()]
         },
         coverageReporter: {
             reporters: [
@@ -99,21 +98,25 @@ gulp.task('test:ci', function (done) {
                 {type: 'text-summary'}
             ]
         }
-    }, done);
+    }, function () {
+        done();
+    }).start();
 });
 
 gulp.task('test:deploy', function (done) {
-    karma.start({
-        configFile: __dirname + '/karma.conf.js'
-    }, done);
-});
-
-gulp.task('test:dev', function (done) {
-    karma.start({
+    new KarmaServer({
         configFile: __dirname + '/karma.conf.js'
     }, function () {
         done();
-    });
+    }).start();
+});
+
+gulp.task('test:dev', function (done) {
+    new KarmaServer({
+        configFile: __dirname + '/karma.conf.js'
+    }, function () {
+        done();
+    }).start();
 });
 
 //watch file changes

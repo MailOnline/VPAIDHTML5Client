@@ -24,7 +24,6 @@ module.exports = function (karma) {
     },
     browserify: {
         debug: true,
-        transform: ['brfs']
     },
 
     logLevel: 'ERROR',

@@ -261,10 +261,8 @@ describe('VPAIDAdUnit.js api', function () {
                     assert(callback1.calledWith(null, 1), 'must return value setted');
                     assert.typeOf(callback2.getCall(0).args[0], 'error', 'must return an error');
                 });
-
         });
-
-    })
+    });
 
 });
 

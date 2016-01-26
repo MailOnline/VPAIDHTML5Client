@@ -6,7 +6,7 @@ function LinearAd() {
 
 IVPAIDAdUnit.METHODS.forEach(function (key) {
     LinearAd.prototype[key] = function () {
-    }
+    };
 });
 
 LinearAd.prototype.handshakeVersion = function (version) {
@@ -30,7 +30,7 @@ LinearAd.prototype.triggerSync = $triggerSync;
 function partial(func, args) {
     return function() {
         func.apply(this, args.concat(arguments));
-    }
+    };
 }
 
 function $trigger(event, msg) {
