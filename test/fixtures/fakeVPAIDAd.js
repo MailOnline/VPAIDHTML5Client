@@ -3,5 +3,5 @@ var IVPAIDAdUnit = require('../../js/IVPAIDAdUnit');
 
 window.getVPAIDAd = function() {
     return new IVPAIDAdUnit();
-}
+};
 

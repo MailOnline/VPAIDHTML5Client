@@ -6,7 +6,7 @@ var getBrowserifyPath = require('../testHelper').getBrowserifyPath;
 var mockPostMessage = require('../testHelper').mockPostMessage;
 var framePostMessage = require('../testHelper').framePostMessage;
 var VPAIDHTML5Client = require('../../js/VPAIDHTML5Client');
-var template = fs.readFileSync(__dirname + '/../fixtures/iframe.template.html', 'utf8');
+var template = require('../testHelper').iframeTemplate;
 
 describe('integration test', function () {
 
@@ -35,7 +35,7 @@ describe('integration test', function () {
         it('the iframe must handshake', function(done) {
             var onLoad = sinon.spy(function () {
                 assert(onLoad.calledOnce);
-                assert.isNull(onLoad.getCall(0).args[0])
+                assert.isNull(onLoad.getCall(0).args[0]);
                 done();
             });
             var vpaid = new VPAIDHTML5Client(el, video, frameConfig);
@@ -111,13 +111,13 @@ describe('integration test', function () {
                 });
                 vpaid = createAndLoad(function(adUnit) {
                     adUnit.subscribe('AdStarted', function(msg) {
-                        adUnit.resizeAd(300, 200, 'normal', callback)
+                        adUnit.resizeAd(300, 200, 'normal', callback);
                     });
                     adUnit.startAd();
                 });
             });
 
-        })
+        });
     });
 
 });
