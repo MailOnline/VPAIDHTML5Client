@@ -1,6 +1,6 @@
 {
   "name": "vpaid-html5-client",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "VPAID HTML5",
   "main": "src/VPAIDHTML5Client.js",
   "scripts": {
