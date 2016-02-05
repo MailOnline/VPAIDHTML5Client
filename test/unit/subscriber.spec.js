@@ -48,9 +48,8 @@ describe('subscriber.js api', function () {
 
                 assert.lengthOf(subscriber._subscribers.test, 2);
                 assert.lengthOf(subscriber._subscribers.test1, 1);
-
-                assert.sameDeepMembers(subscriber.get('test'), [{handler: f1, context: this}, {handler: f2, context: this}]);
-                assert.sameDeepMembers(subscriber.get('test1'), [{handler: f3, context: this}]);
+                assert.sameDeepMembers(subscriber.get('test'), [{handler: f1, context: this, eventName: 'test'}, {handler: f2, context: this, eventName: 'test'}]);
+                assert.sameDeepMembers(subscriber.get('test1'), [{handler: f3, context: this, eventName: 'test1'}]);
             });
 
         });
@@ -68,19 +67,21 @@ describe('subscriber.js api', function () {
             });
 
             it('must unRegister', function() {
-                subscriber.subscribe(function(){}, 'test', this);
-                subscriber.subscribe(noop, 'test', this);
-                subscriber.subscribe(function(){}, 'test1', this);
-                subscriber.subscribe(noop, 'test1', this);
+                var f1 = function f1() {};
+                var f2 = function f2() {};
+
+                subscriber.subscribe(f1, 'test', this);
+                subscriber.subscribe(f2, 'test', this);
+                subscriber.subscribe(f1, 'test1', this);
+                subscriber.subscribe(f2, 'test1', this);
 
                 assert.lengthOf(subscriber.get('test'), 2);
                 assert.lengthOf(subscriber.get('test1'), 2);
 
-                subscriber.unsubscribe(noop, 'test', this);
-                subscriber.unsubscribe(noop, 'test1', this);
+                subscriber.unsubscribe(f2, 'test1', this);
 
-                assert.lengthOf(subscriber.get('test'), 1);
-                assert.lengthOf(subscriber.get('test1'), 1);
+                assert.sameDeepMembers(subscriber.get('test'), [{handler: f1, context: this, eventName: 'test'}, {handler: f2, context: this, eventName: 'test'}]);
+                assert.sameDeepMembers(subscriber.get('test1'), [{handler: f1, context: this, eventName: 'test1'}]);
             });
 
         });
@@ -149,6 +150,28 @@ describe('subscriber.js api', function () {
                     assert(cb.calledWith(data2));
                 });
             });
+
+            it('must trigger the * event listeners', function () {
+                var cb1 = sinon.spy();
+                var cb2 = sinon.spy();
+                subscriber.subscribe(cb1, 'event1');
+                subscriber.subscribe(cb2, '*');
+
+                var data1 = {};
+                var data2 = {};
+
+                subscriber.trigger('event1', data1);
+                clock.tick(1);
+
+                assert(cb1.calledWith(data1));
+                assert(cb2.calledWith(data1));
+
+                cb2.reset();
+
+                subscriber.trigger('event2', data2);
+                clock.tick(1);
+                assert(cb2.calledWith(data2));
+            });
         });
 
         describe('triggerSync', function () {
@@ -181,6 +204,26 @@ describe('subscriber.js api', function () {
                 cb2.forEach(function (cb) {
                     assert(cb.calledWith(data2));
                 });
+            });
+
+            it('must trigger the * event listeners', function () {
+                var cb1 = sinon.spy();
+                var cb2 = sinon.spy();
+                subscriber.subscribe(cb1, 'event1');
+                subscriber.subscribe(cb2, '*');
+
+                var data1 = {};
+                var data2 = {};
+
+                subscriber.triggerSync('event1', data1);
+
+                assert(cb1.calledWith(data1));
+                assert(cb2.calledWith(data1));
+
+                cb2.reset();
+
+                subscriber.triggerSync('event2', data2);
+                assert(cb2.calledWith(data2));
             });
         });
 

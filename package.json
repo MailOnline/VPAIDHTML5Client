@@ -26,7 +26,6 @@
     "url": "https://github.com/MailOnline/VPAIDHTML5Client/issues"
   },
   "homepage": "https://github.com/MailOnline/VPAIDHTML5Client",
-  "//": "locking karma version to 0.13.9 until socket.io patch is released to fix karma issue : https://github.com/karma-runner/karma/issues/1788",
   "devDependencies": {
     "browser-sync": "^2.11.1",
     "browserify": "^13.0.0",
@@ -36,7 +35,7 @@
     "gulp-gh-pages": "^0.5.2",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-util": "^3.0.5",
-    "karma": "0.13.9",
+    "karma": "^0.13.19",
     "karma-browserify": "^5.0.1",
     "karma-chai-sinon": "^0.1.5",
     "karma-chrome-launcher": "^0.2.2",
