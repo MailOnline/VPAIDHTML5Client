@@ -81,7 +81,7 @@ function createElementInEl(parent, tagName, id) {
  * @param {object} data
  */
 function createIframeWithContent(parent, template, data) {
-    var iframe = createIframe(parent);
+    var iframe = createIframe(parent, null, data.zIndex);
     if (!setIframeContent(iframe, simpleTemplate(template, data))) return;
     return iframe;
 }
@@ -92,7 +92,7 @@ function createIframeWithContent(parent, template, data) {
  * @param {HTMLElement} parent
  * @param {string} url
  */
-function createIframe(parent, url) {
+function createIframe(parent, url, zIndex) {
     var nEl = document.createElement('iframe');
     nEl.src = url || 'about:blank';
     nEl.marginWidth = '0';
@@ -106,6 +106,11 @@ function createIframe(parent, url) {
     nEl.style.margin = '0px';
     nEl.style.padding = '0px';
     nEl.style.border = 'none';
+
+    if(zIndex){
+        nEl.style.zIndex = zIndex;
+    }
+
     nEl.setAttribute('SCROLLING','NO');
     parent.innerHTML = '';
     parent.appendChild(nEl);
