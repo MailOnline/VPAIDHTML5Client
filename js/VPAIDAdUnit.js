@@ -35,6 +35,7 @@ function VPAIDAdUnit(VPAIDCreative, el, video, iframe) {
         this._videoEl = video;
         this._iframe = iframe;
         this._subscribers = new Subscriber();
+        utils.setFullSizeStyle(el);
         $addEventsSubscribers.call(this);
     }
 }

@@ -100,12 +100,7 @@ function createIframe(parent, url, zIndex) {
     nEl.frameBorder = '0';
     nEl.width = '100%';
     nEl.height = '100%';
-    nEl.style.position = 'absolute';
-    nEl.style.left = '0';
-    nEl.style.top = '0';
-    nEl.style.margin = '0px';
-    nEl.style.padding = '0px';
-    nEl.style.border = 'none';
+    setFullSizeStyle(nEl);
 
     if(zIndex){
         nEl.style.zIndex = zIndex;
@@ -115,6 +110,17 @@ function createIframe(parent, url, zIndex) {
     parent.innerHTML = '';
     parent.appendChild(nEl);
     return nEl;
+}
+
+function setFullSizeStyle(element) {
+    element.style.position = 'absolute';
+    element.style.left = '0';
+    element.style.top = '0';
+    element.style.margin = '0px';
+    element.style.padding = '0px';
+    element.style.border = 'none';
+    element.style.width = '100%';
+    element.style.height = '100%';
 }
 
 /**
@@ -181,6 +187,7 @@ module.exports = {
     createElementInEl: createElementInEl,
     createIframeWithContent: createIframeWithContent,
     createIframe: createIframe,
+    setFullSizeStyle: setFullSizeStyle,
     simpleTemplate: simpleTemplate,
     setIframeContent: setIframeContent,
     extend: extend,
