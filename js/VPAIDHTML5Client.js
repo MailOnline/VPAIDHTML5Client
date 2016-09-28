@@ -165,8 +165,8 @@ VPAIDHTML5Client.prototype.getID = function () {
  */
 function $removeEl(key) {
     var el = this[key];
-    if (el) {
-        el.remove();
+    if (el && el.parentNode) {
+        el.parentNode.removeChild(el);
         delete this[key];
     }
 }
