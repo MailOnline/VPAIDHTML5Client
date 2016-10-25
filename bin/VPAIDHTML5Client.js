@@ -323,6 +323,7 @@ function VPAIDAdUnit(VPAIDCreative, el, video, iframe) {
         this._videoEl = video;
         this._iframe = iframe;
         this._subscribers = new Subscriber();
+        utils.setFullSizeStyle(el);
         $addEventsSubscribers.call(this);
     }
 }
@@ -596,6 +597,8 @@ VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
  * @param {nodeStyleCallback} callback
  */
 VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
+    if(this._onLoad){ return }
+
     $throwIfDestroyed.call(this);
     $unloadPreviousAdUnit.call(this);
     var that = this;
@@ -712,7 +715,6 @@ function $removeAdElements() {
 function $destroyLoadListener() {
     if (this._onLoad) {
         window.removeEventListener('message', this._onLoad);
-        utils.clearCallbackTimeout(this._onLoad);
         delete this._onLoad;
     }
 }
@@ -747,7 +749,6 @@ function getOrigin() {
 }
 
 module.exports = VPAIDHTML5Client;
-window.VPAIDHTML5Client = VPAIDHTML5Client;
 
 
 },{"./VPAIDAdUnit":2,"./utils":5}],4:[function(require,module,exports){
@@ -830,20 +831,6 @@ function validate(isValid, message) {
     return isValid ? null : new Error(message);
 }
 
-var timeouts = {};
-/**
- * clearCallbackTimeout
- *
- * @param {function} func handler to remove
- */
-function clearCallbackTimeout(func) {
-    var timeout = timeouts[func];
-    if (timeout) {
-        clearTimeout(timeout);
-        delete timeouts[func];
-    }
-}
-
 /**
  * callbackTimeout if the onSuccess is not called and returns true in the timelimit then onTimeout will be called
  *
@@ -856,7 +843,6 @@ function callbackTimeout(timer, onSuccess, onTimeout) {
 
     timeout = setTimeout(function () {
         onSuccess = noop;
-        delete timeout[callback];
         onTimeout();
     }, timer);
 
@@ -864,11 +850,9 @@ function callbackTimeout(timer, onSuccess, onTimeout) {
         // TODO avoid leaking arguments
         // https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#32-leaking-arguments
         if (onSuccess.apply(this, arguments)) {
-            clearCallbackTimeout(callback);
+            clearTimeout(timeout);
         }
     };
-
-    timeouts[callback] = timeout;
 
     return callback;
 }
@@ -896,7 +880,7 @@ function createElementInEl(parent, tagName, id) {
  * @param {object} data
  */
 function createIframeWithContent(parent, template, data) {
-    var iframe = createIframe(parent);
+    var iframe = createIframe(parent, null, data.zIndex);
     if (!setIframeContent(iframe, simpleTemplate(template, data))) return;
     return iframe;
 }
@@ -907,7 +891,7 @@ function createIframeWithContent(parent, template, data) {
  * @param {HTMLElement} parent
  * @param {string} url
  */
-function createIframe(parent, url) {
+function createIframe(parent, url, zIndex) {
     var nEl = document.createElement('iframe');
     nEl.src = url || 'about:blank';
     nEl.marginWidth = '0';
@@ -915,16 +899,29 @@ function createIframe(parent, url) {
     nEl.frameBorder = '0';
     nEl.width = '100%';
     nEl.height = '100%';
-    nEl.style.position = 'absolute';
-    nEl.style.left = '0';
-    nEl.style.top = '0';
-    nEl.style.margin = '0px';
-    nEl.style.padding = '0px';
-    nEl.style.border = 'none';
+    setFullSizeStyle(nEl);
+
+    if(zIndex){
+        nEl.style.zIndex = zIndex;
+    }
+
     nEl.setAttribute('SCROLLING','NO');
     parent.innerHTML = '';
     parent.appendChild(nEl);
     return nEl;
+}
+
+function setFullSizeStyle(element) {
+    if(element) {
+        element.style.position = 'absolute';
+        element.style.left = '0';
+        element.style.top = '0';
+        element.style.margin = '0px';
+        element.style.padding = '0px';
+        element.style.border = 'none';
+        element.style.width = '100%';
+        element.style.height = '100%';
+    }
 }
 
 /**
@@ -986,11 +983,11 @@ function unique(prefix) {
 module.exports = {
     noop: noop,
     validate: validate,
-    clearCallbackTimeout: clearCallbackTimeout,
     callbackTimeout: callbackTimeout,
     createElementInEl: createElementInEl,
     createIframeWithContent: createIframeWithContent,
     createIframe: createIframe,
+    setFullSizeStyle: setFullSizeStyle,
     simpleTemplate: simpleTemplate,
     setIframeContent: setIframeContent,
     extend: extend,

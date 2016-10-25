@@ -77,6 +77,8 @@ VPAIDHTML5Client.prototype.isDestroyed = function isDestroyed() {
  * @param {nodeStyleCallback} callback
  */
 VPAIDHTML5Client.prototype.loadAdUnit = function loadAdUnit(adURL, callback) {
+    if(this._onLoad){ return }
+
     $throwIfDestroyed.call(this);
     $unloadPreviousAdUnit.call(this);
     var that = this;
@@ -193,7 +195,6 @@ function $removeAdElements() {
 function $destroyLoadListener() {
     if (this._onLoad) {
         window.removeEventListener('message', this._onLoad);
-        utils.clearCallbackTimeout(this._onLoad);
         delete this._onLoad;
     }
 }
