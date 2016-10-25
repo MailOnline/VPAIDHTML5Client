@@ -749,7 +749,7 @@ function getOrigin() {
 }
 
 module.exports = VPAIDHTML5Client;
-
+window.VPAIDHTML5Client = VPAIDHTML5Client;
 
 },{"./VPAIDAdUnit":2,"./utils":5}],4:[function(require,module,exports){
 'use strict';
