@@ -15,20 +15,6 @@ function validate(isValid, message) {
     return isValid ? null : new Error(message);
 }
 
-var timeouts = {};
-/**
- * clearCallbackTimeout
- *
- * @param {function} func handler to remove
- */
-function clearCallbackTimeout(func) {
-    var timeout = timeouts[func];
-    if (timeout) {
-        clearTimeout(timeout);
-        delete timeouts[func];
-    }
-}
-
 /**
  * callbackTimeout if the onSuccess is not called and returns true in the timelimit then onTimeout will be called
  *
@@ -41,7 +27,6 @@ function callbackTimeout(timer, onSuccess, onTimeout) {
 
     timeout = setTimeout(function () {
         onSuccess = noop;
-        delete timeout[callback];
         onTimeout();
     }, timer);
 
@@ -49,11 +34,9 @@ function callbackTimeout(timer, onSuccess, onTimeout) {
         // TODO avoid leaking arguments
         // https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#32-leaking-arguments
         if (onSuccess.apply(this, arguments)) {
-            clearCallbackTimeout(callback);
+            clearTimeout(timeout);
         }
     };
-
-    timeouts[callback] = timeout;
 
     return callback;
 }
@@ -113,14 +96,16 @@ function createIframe(parent, url, zIndex) {
 }
 
 function setFullSizeStyle(element) {
-    element.style.position = 'absolute';
-    element.style.left = '0';
-    element.style.top = '0';
-    element.style.margin = '0px';
-    element.style.padding = '0px';
-    element.style.border = 'none';
-    element.style.width = '100%';
-    element.style.height = '100%';
+    if(element) {
+        element.style.position = 'absolute';
+        element.style.left = '0';
+        element.style.top = '0';
+        element.style.margin = '0px';
+        element.style.padding = '0px';
+        element.style.border = 'none';
+        element.style.width = '100%';
+        element.style.height = '100%';
+    }
 }
 
 /**
@@ -182,7 +167,6 @@ function unique(prefix) {
 module.exports = {
     noop: noop,
     validate: validate,
-    clearCallbackTimeout: clearCallbackTimeout,
     callbackTimeout: callbackTimeout,
     createElementInEl: createElementInEl,
     createIframeWithContent: createIframeWithContent,
