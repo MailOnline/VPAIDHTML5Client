@@ -218,14 +218,12 @@ function $throwIfDestroyed() {
 }
 
 function getOrigin() {
-    if( window.location.origin ) {
-        return window.location.origin;
-    }
-    else {
-        return window.location.protocol + "//" +
-            window.location.hostname +
-            (window.location.port ? ':' + window.location.port: '');
-    }
+    var _location = window.parent.location;
+    return _location.origin || (
+        _location.protocol + '//' +
+        _location.hostname +
+        (_location.port ? ':' + _location.port: '')
+    );
 }
 
 module.exports = VPAIDHTML5Client;
