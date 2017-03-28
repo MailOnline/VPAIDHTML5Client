@@ -687,8 +687,8 @@ VPAIDHTML5Client.prototype.getID = function () {
  */
 function $removeEl(key) {
     var el = this[key];
-    if (el) {
-        el.remove();
+    if (el && el.parentNode) {
+        el.parentNode.removeChild(el);
         delete this[key];
     }
 }
@@ -738,14 +738,12 @@ function $throwIfDestroyed() {
 }
 
 function getOrigin() {
-    if( window.location.origin ) {
-        return window.location.origin;
-    }
-    else {
-        return window.location.protocol + "//" +
-            window.location.hostname +
-            (window.location.port ? ':' + window.location.port: '');
-    }
+    var _location = window.parent.location;
+    return _location.origin || (
+        _location.protocol + '//' +
+        _location.hostname +
+        (_location.port ? ':' + _location.port: '')
+    );
 }
 
 module.exports = VPAIDHTML5Client;
@@ -996,6 +994,5 @@ module.exports = {
 
 
 },{}]},{},[3])
-
 
 //# sourceMappingURL=VPAIDHTML5Client.js.map
