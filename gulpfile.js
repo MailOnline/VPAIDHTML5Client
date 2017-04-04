@@ -35,7 +35,8 @@ var jsBuilds = [
                 watchify.args,
                 {
                     entries: ['./js/' + entry],
-                    debug: true
+                    debug: true,
+                    standalone: 'VPAIDHTML5Client'
                 }
             )
         )
