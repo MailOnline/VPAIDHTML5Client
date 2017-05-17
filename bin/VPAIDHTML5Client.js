@@ -871,6 +871,9 @@ function callbackTimeout(timer, onSuccess, onTimeout) {
  * @param {string} id
  */
 function createElementInEl(parent, tagName, id) {
+    if (typeof parent === 'undefined') {
+        return;
+    }
     var nEl = document.createElement(tagName);
     if (id) nEl.id = id;
     parent.appendChild(nEl);
@@ -998,7 +1001,6 @@ module.exports = {
     extend: extend,
     unique: unique
 };
-
 
 },{}]},{},[3])
 
