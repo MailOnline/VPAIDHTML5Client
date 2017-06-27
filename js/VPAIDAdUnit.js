@@ -62,7 +62,7 @@ IVPAIDAdUnit.METHODS.forEach(function(method) {
     if (ignores.indexOf(method) !== -1) return;
 
     VPAIDAdUnit.prototype[method] = function () {
-        var ariaty = IVPAIDAdUnit.prototype[method].length;
+        var ariaty = IVPAIDAdUnit.METHODS_LENGTH[method];
         // TODO avoid leaking arguments
         // https://github.com/petkaantonov/bluebird/wiki/Optimization-killers#32-leaking-arguments
         var args = Array.prototype.slice.call(arguments);

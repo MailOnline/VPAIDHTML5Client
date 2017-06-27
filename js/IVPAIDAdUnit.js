@@ -15,6 +15,22 @@ var METHODS = [
     'unsubscribe'
 ];
 
+// for avoiding argument leaking
+var METHODS_LENGTH = {
+    'handshakeVersion': 2,
+    'initAd': 7,
+    'startAd': 1,
+    'stopAd': 1,
+    'skipAd': 1, // VPAID 2.0 new method
+    'resizeAd': 4,
+    'pauseAd': 1,
+    'resumeAd': 1,
+    'expandAd': 1,
+    'collapseAd': 1,
+    'subscribe': 3,
+    'unsubscribe': 2
+};
+
 var EVENTS = [
     'AdLoaded',
     'AdStarted',
@@ -257,6 +273,7 @@ IVPAIDAdUnit.prototype.getAdIcons = function(callback) {};
 IVPAIDAdUnit.prototype.setAdVolume = function(volume, callback) {};
 
 addStaticToInterface(IVPAIDAdUnit, 'METHODS', METHODS);
+addStaticToInterface(IVPAIDAdUnit, 'METHODS_LENGTH', METHODS_LENGTH);
 addStaticToInterface(IVPAIDAdUnit, 'GETTERS', GETTERS);
 addStaticToInterface(IVPAIDAdUnit, 'SETTERS', SETTERS);
 addStaticToInterface(IVPAIDAdUnit, 'EVENTS',  EVENTS);
