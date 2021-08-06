@@ -43,7 +43,7 @@
     "karma-firefox-launcher": "^0.1.6",
     "karma-mocha": "^0.2.1",
     "karma-source-map-support": "^1.0.0",
-    "karma-spec-reporter": "^0.0.23",
+    "karma-spec-reporter": "^0.0.32",
     "lodash": "^4.0.1",
     "mocha": "^2.2.5",
     "mversion": "^1.10.1",
