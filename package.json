@@ -31,7 +31,7 @@
     "browserify": "^13.0.0",
     "browserify-istanbul": "^0.2.1",
     "chai": "^3.0.0",
-    "gulp": "^3.9.0",
+    "gulp": "^4.0.0",
     "gulp-gh-pages": "^0.5.2",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-util": "^3.0.5",
