@@ -35,7 +35,7 @@
     "gulp-gh-pages": "^0.5.2",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-util": "^3.0.5",
-    "karma": "^0.13.19",
+    "karma": "^5.0.8",
     "karma-browserify": "^5.0.1",
     "karma-chai-sinon": "^0.1.5",
     "karma-chrome-launcher": "^0.2.2",
